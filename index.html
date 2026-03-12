@@ -330,6 +330,16 @@
         'light': { text: '✨명속성', class: 'bg-elem-light', reqMat: 'light', namePrefix: ['성기사의 ', '신성한 '] }
     };
 
+    const getMatInfo = (key) => {
+        const matMap = {
+            iron: { text: '🪨철광석', icon: '🪨' }, water: { text: '💧심해수', icon: '💧' },
+            fire: { text: '🔥화염석', icon: '🔥' }, ice: { text: '❄️만년설', icon: '❄️' },
+            lightn: { text: '⚡번개조각', icon: '⚡' }, dark: { text: '🔮심연의혼', icon: '🔮' },
+            light: { text: '✨빛의결정', icon: '✨' }
+        };
+        return matMap[key] || { text: '❓재료', icon: '❓' };
+    };
+
     const TIERS = [
         { rarity: 1, gold: 100, mats: 0, basePrice: 50 },
         { rarity: 2, gold: 300, mats: 5, basePrice: 150 }, 
@@ -402,7 +412,7 @@
 
     let dispatchInterval = null;
 
-    // --- 3. 핵심 유틸리티 (누락 복구 완료) ---
+    // --- 3. 핵심 유틸리티 ---
     function safeSetText(id, text) { 
         const el = document.getElementById(id); 
         if (el) el.innerText = text; 
@@ -425,16 +435,6 @@
         if(l >= 15) return "text-orange-400 font-black"; 
         if(l >= 10) return "text-purple-400 font-bold"; 
         return r >= 7 ? 'text-yellow-400' : (r >= 5 ? 'text-purple-400' : 'text-gray-200'); 
-    }
-
-    function getMatInfo(key) {
-        const matMap = {
-            iron: { text: '🪨철광석', icon: '🪨' }, water: { text: '💧심해수', icon: '💧' },
-            fire: { text: '🔥화염석', icon: '🔥' }, ice: { text: '❄️만년설', icon: '❄️' },
-            lightn: { text: '⚡번개조각', icon: '⚡' }, dark: { text: '🔮심연의혼', icon: '🔮' },
-            light: { text: '✨빛의결정', icon: '✨' }
-        };
-        return matMap[key] || { text: '❓재료', icon: '❓' };
     }
 
     function getBaseValue(id, level) {
@@ -554,6 +554,17 @@
     }
 
     // --- 4. 액션 로직 (제작/강화/스왑/파견/상점) ---
+    function goToCraft(itemId) {
+        const item = ITEMS[itemId];
+        if(item) {
+            const filterEl = document.getElementById('craft-filter');
+            if(filterEl) filterEl.value = item.type;
+            openTab('craft');
+            renderCraftList();
+            addLog(`[이동] '${item.name}' 제작으로 이동했습니다.`, 'text-blue-300');
+        }
+    }
+
     function craftWeapon(id) {
         const item = ITEMS[id]; 
         const isDiscount = !!state.freeCraft[item.type];
@@ -969,10 +980,13 @@
         state.quests.forEach((q, i) => {
             const item = ITEMS[q.targetId];
             let can = (state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel) || state.inventory.some(w => w.id === q.targetId && w.level >= q.reqLevel);
-            list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border ${can ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'border-gray-700'} mb-2">
-                <div class="font-bold text-sm text-gray-200">+${q.reqLevel} ${item.name} 납품</div>
-                <div class="text-xs text-yellow-400 mb-2">보상: ${q.reward.toLocaleString()}G</div>
-                <button onclick="completeQuest(${i})" ${can ? '' : 'disabled'} class="w-full ${can ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 text-gray-500'} py-1.5 rounded font-bold text-xs transition-colors">납품하기</button>
+            list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border ${can ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'border-gray-700'} mb-2 flex flex-col gap-2">
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-sm text-gray-200">+${q.reqLevel} ${item.name} 납품</div>
+                    <button onclick="goToCraft('${q.targetId}')" class="btn-press shrink-0 bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-700/50 transition">🛠️ 바로가기</button>
+                </div>
+                <div class="text-xs text-yellow-400">보상: ${q.reward.toLocaleString()}G</div>
+                <button onclick="completeQuest(${i})" ${can ? '' : 'disabled'} class="w-full ${can ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 text-gray-500'} py-1.5 rounded font-bold text-xs transition-colors mt-1">납품하기</button>
             </div>`;
         });
     }
@@ -981,10 +995,13 @@
         const list = document.getElementById('collection-list'); if(!list) return; list.innerHTML = '';
         COLLECTIONS.forEach(c => {
             let can = !c.done && ((state.anvil && state.anvil.id === c.targetId && state.anvil.level >= c.reqLevel) || state.inventory.some(w => w.id === c.targetId && w.level >= c.reqLevel));
-            list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border ${c.done ? 'border-yellow-600 opacity-50' : 'border-gray-600'} mb-2">
-                <div class="font-bold text-sm ${c.done ? 'text-yellow-500' : 'text-gray-200'}">${c.title} ${c.done ? '(완료)' : ''}</div>
-                <div class="text-[11px] text-blue-300 mb-2">${c.desc} (+${c.reqLevel} ${ITEMS[c.targetId].name})</div>
-                ${!c.done ? `<button onclick="registerColl('${c.id}')" ${can ? '' : 'disabled'} class="w-full ${can ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-gray-700 text-gray-500'} py-1.5 rounded font-bold text-xs transition-colors">등록하기</button>` : ''}
+            list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border ${c.done ? 'border-yellow-600 opacity-50' : 'border-gray-600'} mb-2 flex flex-col gap-2">
+                <div class="flex justify-between items-start">
+                    <div class="font-bold text-sm ${c.done ? 'text-yellow-500' : 'text-gray-200'}">${c.title} ${c.done ? '(완료)' : ''}</div>
+                    ${!c.done ? `<button onclick="goToCraft('${c.targetId}')" class="btn-press shrink-0 bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-700/50 transition">🛠️ 바로가기</button>` : ''}
+                </div>
+                <div class="text-[11px] text-blue-300">${c.desc} <span class="text-gray-400">(+${c.reqLevel} ${ITEMS[c.targetId].name})</span></div>
+                ${!c.done ? `<button onclick="registerColl('${c.id}')" ${can ? '' : 'disabled'} class="w-full ${can ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-gray-700 text-gray-500'} py-1.5 rounded font-bold text-xs transition-colors mt-1">등록하기</button>` : ''}
             </div>`;
         });
     }
