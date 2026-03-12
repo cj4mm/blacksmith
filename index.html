@@ -244,17 +244,8 @@
 
             <!-- 제작 -->
             <div id="tab-craft" class="tab-content flex-1 p-4 bg-gray-900/50 overflow-y-auto custom-scrollbar">
-                <select id="craft-filter" onchange="renderCraftList()" class="w-full bg-black/60 border border-gray-600 rounded-lg p-3 text-sm text-white mb-3 font-bold outline-none shrink-0">
-                    <option value="all">🔍 모든 무기 보기</option>
-                    <option value="검">🗡️ 검 (표준)</option>
-                    <option value="단검">🔪 단검 (속도 55% 단축, 재료 확정 +1)</option>
-                    <option value="대검">⚔️ 대검 (골드 보상 30% 증가)</option>
-                    <option value="방패">🛡️ 방패 (내구도 소모 50% 확률 방어)</option>
-                    <option value="지팡이">🪄 지팡이 (축복 발견 확률 2배)</option>
-                    <option value="활">🏹 활 (속도 25% 단축, 완료권 확률↑)</option>
-                    <option value="너클">👊 너클 (속도 40% 단축, 대성공 확률 35%)</option>
-                    <option value="낫">🪓 낫 (골드 보상 85% 증가, 내구도 6)</option>
-                </select>
+                <!-- JS에서 동적으로 채움 -->
+                <select id="craft-filter" onchange="renderCraftList()" class="w-full bg-black/60 border border-gray-600 rounded-lg p-3 text-sm text-white mb-3 font-bold outline-none shrink-0"></select>
                 <div id="craft-list" class="space-y-3"></div>
             </div>
 
@@ -495,6 +486,10 @@
                 if(state.completedCollections) {
                     state.completedCollections.forEach(id => { let c = COLLECTIONS.find(x => x.id === id); if(c) c.done = true; }); 
                 }
+                if(state.quests && state.quests.length > 0) {
+                    let invalid = state.quests.some(q => { let it = ITEMS[q.targetId]; return !it || !state.unlockedWeapons.includes(it.type); });
+                    if(invalid) generateQuests();
+                }
                 if(state.merc.isDispatching) resumeDispatch(); 
                 updateUI(); 
                 return true; 
@@ -557,9 +552,10 @@
     function goToCraft(itemId) {
         const item = ITEMS[itemId];
         if(item) {
-            const filterEl = document.getElementById('craft-filter');
-            if(filterEl) filterEl.value = item.type;
             openTab('craft');
+            const filterEl = document.getElementById('craft-filter');
+            updateCraftFilter(); // 옵션부터 채운 뒤
+            if(filterEl) filterEl.value = item.type; // 값 설정
             renderCraftList();
             addLog(`[이동] '${item.name}' 제작으로 이동했습니다.`, 'text-blue-300');
         }
@@ -788,16 +784,28 @@
     function buyBlessing() { if(state.gold < 10000000) return; state.gold -= 10000000; state.blessings++; updateUI(); addLog("[구매] 🌸 여신의 축복 획득"); }
 
     function generateQuests(man = false) {
-        if(man && state.nextQuestRefresh > Date.now()) return;
-        state.nextQuestRefresh = Date.now() + 60000; state.quests = [];
-        const ids = Object.keys(ITEMS).filter(id => state.unlockedWeapons.includes(ITEMS[id].type));
+        if(man && state.nextQuestRefresh > Date.now()) {
+            addLog("[경고] 아직 의뢰를 갱신할 수 없습니다.", "text-red-400");
+            return;
+        }
+        state.nextQuestRefresh = Date.now() + 60000; 
+        state.quests = [];
+        
+        // 💡 유저의 최고 강화 수치에 비례해서 요구하는 티어(희귀도)를 제한함 (뉴비 억까 방지)
+        let maxRar = Math.min(8, 2 + Math.floor((state.history.maxUpgrade || 0) / 2));
+
+        const ids = Object.keys(ITEMS).filter(id => {
+            const item = ITEMS[id];
+            return state.unlockedWeapons.includes(item.type) && item.rarity <= maxRar;
+        });
+
         for(let i=0; i<4; i++) {
             let rid = ids[Math.floor(Math.random() * ids.length)];
             let rlv = Math.floor(Math.random() * 6) + 3;
             // 의뢰 2.8배 보상
             state.quests.push({ targetId: rid, reqLevel: rlv, reward: Math.floor(getSellPrice({id: rid, level: rlv}) * 2.8) });
         }
-        if(man) addLog("[의뢰] 목록이 갱신되었습니다.", "text-blue-300");
+        if(man) addLog("[의뢰] 상인 길드에 새로운 목록을 요청했습니다.", "text-blue-300");
         updateUI();
     }
 
@@ -836,6 +844,33 @@
             let s = Math.ceil((state.nextQuestRefresh - Date.now()) / 1000);
             btn.innerText = `⏳ ${s}초`; btn.disabled = true;
         } else { btn.innerText = `🔄 갱신 (1분)`; btn.disabled = false; }
+    }
+
+    function updateCraftFilter() {
+        const filterEl = document.getElementById('craft-filter');
+        if (!filterEl) return;
+        const currentVal = filterEl.value;
+        
+        const icons = { '검': '🗡️', '단검': '🔪', '대검': '⚔️', '방패': '🛡️', '지팡이': '🪄', '활': '🏹', '너클': '👊', '낫': '🪓' };
+        const desc = {
+            '검': '표준', '단검': '속도 55% 단축, 재료 확정 +1', '대검': '골드 보상 30% 증가',
+            '방패': '내구도 소모 50% 확률 방어', '지팡이': '축복 발견 확률 2배', '활': '속도 25% 단축, 완료권 확률↑',
+            '너클': '속도 40% 단축, 대성공 35%', '낫': '골드 보상 85% 증가, 내구도 6'
+        };
+
+        let html = `<option value="all">🔍 모든 무기 보기</option>`;
+        state.unlockedWeapons.forEach(w => {
+            html += `<option value="${w}">${icons[w]} ${w} (${desc[w]})</option>`;
+        });
+
+        if (filterEl.innerHTML !== html) {
+            filterEl.innerHTML = html;
+            if (state.unlockedWeapons.includes(currentVal) || currentVal === 'all') {
+                filterEl.value = currentVal;
+            } else {
+                filterEl.value = 'all';
+            }
+        }
     }
 
     function updateUI() {
@@ -926,6 +961,7 @@
         let mInv = 20 + (state.facilities.vault * 5);
         safeSetText('inv-count', state.inventory.length); safeSetText('inv-total', mInv); safeSetText('inv-max-count', mInv);
 
+        updateCraftFilter();
         renderInventory(); renderCraftList(); renderFacilities(); renderQuests(); renderCollections(); saveGame();
     }
 
