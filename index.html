@@ -302,7 +302,7 @@
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 (살짝 적자 설계) 🔨</h3>
                     <p>재료를 모아 무기를 만들고 강화하세요. <span class="text-red-400 font-bold">+5강부터 즉시 파괴 확률이 존재</span>하며, +9강 이후부터는 강화 비용이 <span class="text-yellow-300">현재 무기 가치의 10%</span>로 적용됩니다.</p>
-                    <p class="mt-1 font-bold text-teal-300">💡 [주의] 모든 강화는 상점 판매 시 '살짝 적자(2% 내외)'를 보도록 설계되었습니다. 반드시 의뢰(3배)와 파견을 통해 이득을 챙겨야 합니다!</p>
+                    <p class="mt-1 font-bold text-teal-300">💡 [주의] 1~9강 구간을 상점에 바로 팔면 약간의 손해를 봅니다. 의뢰(3배)를 통해 이득을 챙기고, +10강 잭팟을 노려보세요!</p>
                 </div>
                 
                 <div>
@@ -552,8 +552,8 @@
     // 💸 동적 가치(Base Value) 산출 로직: EV 0.98 (살짝 적자) 모델
     function getBaseValue(weaponId, level) {
         const item = ITEMS[weaponId];
-        // 0~9강 구간: 의뢰 없이는 무조건 적자나도록 거품 제거 곡선 유지
-        let val = item.basePrice + Math.floor(Math.pow(level, 2.3) * 15 * (item.rarity * 0.5));
+        // 0~9강 구간: 살짝만 손해 나도록 2.3 -> 2.5로 완화
+        let val = item.basePrice + Math.floor(Math.pow(level, 2.5) * 15 * (item.rarity * 0.5));
         
         // 10강 이상: 100회 돌리면 약간 적자(0.98)가 나도록 역산된 잭팟 배율 적용
         const evDeficitMultipliers = [
@@ -571,7 +571,7 @@
         ];
         
         if (level >= 10) {
-            let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.3) * 15 * (item.rarity * 0.5));
+            let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.5) * 15 * (item.rarity * 0.5));
             val = valAt9;
             for (let i = 10; i <= level; i++) {
                 val = Math.floor(val * evDeficitMultipliers[i - 10]);
