@@ -297,6 +297,103 @@
     </div>
 
 <script>
+    // --- 1. 무기 데이터 & 최종 밸런싱 ---
+    const WEAPON_TYPES = {
+        '검':   { baseDur: 15, timeMod: 1.0,  rewardMod: 1.0,  dropMod: 1.0, utility: '표준형' },
+        '단검': { baseDur: 8,  timeMod: 0.45, rewardMod: 0.6,  dropMod: 1.0, utility: '추가재료 확정+1' },
+        '방패': { baseDur: 40, timeMod: 1.6,  rewardMod: 1.0,  dropMod: 1.0, utility: '내구도 소모 50% 방어' },
+        '활':   { baseDur: 12, timeMod: 0.75, rewardMod: 1.0,  dropMod: 1.2, utility: '완료권 발견 증가' },
+        '대검': { baseDur: 18, timeMod: 1.3,  rewardMod: 1.3,  dropMod: 1.0, utility: '골드 보너스' },
+        '지팡이':{ baseDur: 10, timeMod: 1.1, rewardMod: 0.8,  dropMod: 1.2, utility: '축복 발견 2배' },
+        '너클': { baseDur: 25, timeMod: 0.6,  rewardMod: 0.85, dropMod: 1.0, utility: '대성공 확률 증가' },
+        '낫':   { baseDur: 6,  timeMod: 1.2,  rewardMod: 1.85, dropMod: 0.8, utility: '압도적 골드 보상' }
+    };
+
+    const ELEM_DATA = {
+        'none':   { text: '⚪무속성', class: 'bg-elem-none',   reqMat: 'iron',   namePrefix: ['초심자의 ', '강철 '] },
+        'water':  { text: '💧수속성', class: 'bg-elem-water',  reqMat: 'water',  namePrefix: ['해일의 ', '심해 '] },
+        'fire':   { text: '🔥화속성', class: 'bg-elem-fire',   reqMat: 'fire',   namePrefix: ['화염의 ', '홍련의 '] },
+        'ice':    { text: '❄️빙결속성', class: 'bg-elem-ice',   reqMat: 'ice',    namePrefix: ['서리내린 ', '절대영도 '] },
+        'lightn': { text: '⚡전격속성', class: 'bg-elem-lightn', reqMat: 'lightn', namePrefix: ['천둥벌거숭이 ', '뇌신 '] },
+        'dark':   { text: '🔮암속성', class: 'bg-elem-dark',   reqMat: 'dark',   namePrefix: ['칠흑의 ', '나락의 '] },
+        'light':  { text: '✨명속성', class: 'bg-elem-light',  reqMat: 'light',  namePrefix: ['성기사의 ', '신성한 '] }
+    };
+
+    const getMatInfo = (key) => {
+        const matMap = {
+            iron: { text: '🪨철광석', icon: '🪨' },
+            water: { text: '💧심해수', icon: '💧' },
+            fire: { text: '🔥화염석', icon: '🔥' },
+            ice: { text: '❄️만년설', icon: '❄️' },
+            lightn: { text: '⚡번개조각', icon: '⚡' },
+            dark: { text: '🔮심연의혼', icon: '🔮' },
+            light: { text: '✨빛의결정', icon: '✨' }
+        };
+        return matMap[key] || { text: '❓재료', icon: '❓' };
+    };
+
+    const TIERS = [
+        { rarity: 1, gold: 100,   mats: 0,  basePrice: 50 },
+        { rarity: 2, gold: 300,   mats: 5,  basePrice: 150 },
+        { rarity: 3, gold: 800,   mats: 10, basePrice: 500 },
+        { rarity: 4, gold: 1500,  mats: 15, basePrice: 1000 },
+        { rarity: 5, gold: 3000,  mats: 25, basePrice: 2000 },
+        { rarity: 6, gold: 6000,  mats: 35, basePrice: 4000 },
+        { rarity: 7, gold: 12000, mats: 50, basePrice: 8000 },
+        { rarity: 8, gold: 25000, mats: 70, basePrice: 15000 }
+    ];
+
+    const ITEMS = {};
+    for (let type of Object.keys(WEAPON_TYPES)) {
+        TIERS.forEach((t, idx) => {
+            const id = `${type}_t${idx+1}`;
+            const elemKey = ['none', 'none', 'water', 'fire', 'ice', 'lightn', 'dark', 'light'][idx];
+            let name = `${ELEM_DATA[elemKey].namePrefix[idx % 2]}${type}`;
+            if (idx === 7) name = `전설의 ${name}`;
+
+            ITEMS[id] = {
+                id,
+                name,
+                type,
+                element: elemKey,
+                rarity: t.rarity,
+                gold: t.gold,
+                mats: t.mats > 0 ? { [ELEM_DATA[elemKey].reqMat]: t.mats } : {},
+                basePrice: t.basePrice,
+                maxDur: WEAPON_TYPES[type].baseDur
+            };
+        });
+    }
+
+    const REGIONS = [
+        { id: 'forest',  name: '초보자의 숲',   baseTime: 20,  recLevel: 0,  weakness: 'none',   failRate: 0.05, rewardG: 150,   dropMat: 'iron' },
+        { id: 'ruins',   name: '침수된 유적',   baseTime: 45,  recLevel: 3,  weakness: 'lightn', failRate: 0.10, rewardG: 400,   dropMat: 'water' },
+        { id: 'volcano', name: '타오르는 화산', baseTime: 90,  recLevel: 6,  weakness: 'water',  failRate: 0.15, rewardG: 1000,  dropMat: 'fire' },
+        { id: 'snow',    name: '얼어붙은 설산', baseTime: 150, recLevel: 9,  weakness: 'fire',   failRate: 0.20, rewardG: 2500,  dropMat: 'ice' },
+        { id: 'thunder', name: '천둥의 고원',   baseTime: 240, recLevel: 12, weakness: 'ice',    failRate: 0.25, rewardG: 6000,  dropMat: 'lightn' },
+        { id: 'abyss',   name: '망자의 지하묘지', baseTime: 400, recLevel: 15, weakness: 'light', failRate: 0.35, rewardG: 12000, dropMat: 'dark' },
+        { id: 'heaven',  name: '천공의 신전',   baseTime: 600, recLevel: 18, weakness: 'dark',   failRate: 0.45, rewardG: 30000, dropMat: 'light' }
+    ];
+
+    const FACILITIES = {
+        hammer:    { id: 'hammer',    name: '미스릴 망치',   icon: '🔨', desc: '기본 강화 성공률 +1%', max: 10, getCost: (lv) => ({ gold: 50000 * Math.pow(3, lv),  mat: 'iron',  matCost: 80 * (lv+1) * 2 }) },
+        bellows:   { id: 'bellows',   name: '고블린 풀무',   icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 5, getCost: (lv) => ({ gold: 100000 * Math.pow(3, lv), mat: 'fire',  matCost: 40 * (lv+1) * 2 }) },
+        vault:     { id: 'vault',     name: '비밀 금고',     icon: '🧰', desc: '보관함 최대 칸수 +5칸', max: 10, getCost: (lv) => ({ gold: 150000 * Math.pow(3, lv), mat: 'water', matCost: 40 * (lv+1) * 2 }) },
+        mercenary: { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -2%, 보상 +5%', max: 10, getCost: (lv) => ({ gold: 200000 * Math.pow(3, lv), mat: 'dark', matCost: 25 * (lv+1) * 2 }) }
+    };
+
+    const BASE_RATES = [
+        { s: 1.00, m: 0.00, d: 0.00 }, { s: 0.90, m: 0.10, d: 0.00 }, { s: 0.85, m: 0.15, d: 0.00 }, { s: 0.70, m: 0.30, d: 0.00 },
+        { s: 0.55, m: 0.45, d: 0.00 }, { s: 0.45, m: 0.50, d: 0.05 }, { s: 0.40, m: 0.55, d: 0.05 }, { s: 0.35, m: 0.60, d: 0.05 },
+        { s: 0.32, m: 0.62, d: 0.06 }, { s: 0.30, m: 0.63, d: 0.07 }, { s: 0.25, m: 0.65, d: 0.10 }, { s: 0.22, m: 0.68, d: 0.10 },
+        { s: 0.20, m: 0.69, d: 0.11 }, { s: 0.18, m: 0.71, d: 0.11 }, { s: 0.15, m: 0.73, d: 0.12 }, { s: 0.12, m: 0.76, d: 0.12 },
+        { s: 0.10, m: 0.77, d: 0.13 }, { s: 0.08, m: 0.79, d: 0.13 }, { s: 0.06, m: 0.80, d: 0.14 }, { s: 0.04, m: 0.81, d: 0.15 }
+    ];
+
+    const COLLECTIONS = [
+        { id: 'c1', targetId: '검_t2',   reqLevel: 10, title: '검사의 기초',  desc: '강화 성공률 3% 증가',    buff: { type: 'successRate', val: 0.03 } },
+        { id: 'c2', targetId: '단검_t3', reqLevel: 12, title: '바람의 발걸음', desc: '전체 파견 시간 15% 단축', buff: { type: 'dispatchTime', val: 0.85 } }
+    ];
 
     // --- 2. 상태값 ---
     let state = {
