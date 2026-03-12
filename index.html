@@ -199,7 +199,7 @@
             <div id="merc-dispatching" class="absolute inset-0 bg-gray-900/95 flex flex-col items-center justify-center p-8 hidden z-10 backdrop-blur-md rounded-2xl">
                 <div class="text-7xl mb-6 animate-bounce drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]">🏃‍♂️</div>
                 <h3 id="dispatch-region-text" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">탐색 중...</h3>
-                <p id="dispatch-weak-text" class="text-sm text-yellow-400 font-bold mb-6 text-center h-5 drop-shadow-md"></p>
+                <p id="dispatch-weak-text" class="text-sm text-yellow-400 font-bold mb-8 text-center h-5 drop-shadow-md"></p>
                 
                 <div class="w-full bg-gray-800 h-8 rounded-xl overflow-hidden border border-gray-600 relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
                     <div id="dispatch-progress-bar" class="bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 h-full w-0 transition-none relative">
@@ -272,7 +272,7 @@
             <!-- 도감 -->
             <div id="tab-book" class="tab-content flex-1 min-h-0 p-4 bg-gray-900/50">
                 <p class="shrink-0 text-[12px] text-yellow-400 mb-4 bg-yellow-900/20 p-3 rounded-lg border border-yellow-700/50 font-medium leading-relaxed">
-                    🌟 모루의 무기를 희생하여 <span class="font-bold text-white">영구적인 패시브 버프</span>를 획득합니다.
+                    🌟 모루 또는 보관함의 무기를 희생하여 <span class="font-bold text-white">영구적인 패시브 버프</span>를 획득합니다.
                 </p>
                 <div id="collection-list" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar"></div>
             </div>
@@ -908,8 +908,18 @@
         list.innerHTML = '';
         state.quests.forEach((q, idx) => {
             const item = ITEMS[q.targetId];
-            let canComplete = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
             
+            // 모루 및 보관함 양쪽 다 체크
+            let validAnvil = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
+            let validInvIndex = state.inventory.findIndex(w => w.id === q.targetId && w.level >= q.reqLevel);
+            let canComplete = validAnvil || validInvIndex !== -1;
+            
+            let btnText = '조건 미달성 (무기 필요)';
+            if(canComplete) {
+                if(validAnvil) btnText = '모루의 무기로 납품';
+                else btnText = '보관함의 무기로 납품';
+            }
+
             list.innerHTML += `
                 <div class="bg-gray-800 p-4 rounded-xl flex flex-col border ${canComplete ? 'border-green-500 bg-green-900/20' : 'border-gray-700'} shadow-sm gap-3">
                     <div class="min-w-0 w-full flex justify-between items-start">
@@ -920,7 +930,9 @@
                         <span class="truncate">조건: <span class="text-white font-bold">+${q.reqLevel} [${item.type}] ${item.name}</span> 이상</span>
                         <button onclick="goToCraft('${q.targetId}')" class="btn-press shrink-0 bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-700/50 transition">🛠️ 바로가기</button>
                     </div>
-                    <button onclick="completeQuest(${idx})" ${canComplete ? '' : 'disabled'} class="btn-press w-full py-2.5 mt-1 bg-gradient-to-b from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold text-sm shadow border border-green-500/30">납품하기</button>
+                    <button onclick="completeQuest(${idx})" ${canComplete ? '' : 'disabled'} class="btn-press w-full py-2.5 mt-1 ${canComplete ? 'bg-gradient-to-b from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white shadow border-green-500/30' : 'bg-gray-700 text-gray-500'} rounded-lg font-bold text-sm transition-all border">
+                        ${btnText}
+                    </button>
                 </div>
             `;
         });
@@ -930,8 +942,17 @@
         const list = document.getElementById('collection-list');
         list.innerHTML = '';
         COLLECTIONS.forEach(c => {
-            let canReg = !c.done && state.anvil && state.anvil.id === c.targetId && state.anvil.level >= c.reqLevel;
+            // 모루 및 보관함 양쪽 다 체크
+            let validAnvil = state.anvil && state.anvil.id === c.targetId && state.anvil.level >= c.reqLevel;
+            let validInvIndex = state.inventory.findIndex(w => w.id === c.targetId && w.level >= c.reqLevel);
+            let canReg = !c.done && (validAnvil || validInvIndex !== -1);
             let targetItem = ITEMS[c.targetId];
+
+            let btnText = '조건 미달성 (무기 필요)';
+            if(canReg) {
+                if(validAnvil) btnText = '✨ 모루의 무기로 등록 (소멸)';
+                else btnText = '✨ 보관함의 무기로 등록 (소멸)';
+            }
             
             list.innerHTML += `
                 <div class="relative bg-gradient-to-br ${c.done ? 'from-gray-900 to-black border-gray-800 opacity-60' : 'from-gray-800 to-gray-900 border-gray-600'} p-5 rounded-xl border shadow-lg overflow-hidden flex flex-col gap-3 transition-all ${canReg && !c.done ? 'ring-2 ring-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : ''}">
@@ -958,7 +979,7 @@
                     
                     ${!c.done ? `
                         <button onclick="registerCollection('${c.id}')" ${canReg ? '' : 'disabled'} class="btn-press w-full py-2.5 mt-1 ${canReg ? 'bg-gradient-to-r from-yellow-600 to-orange-500 text-white shadow-[0_0_10px_rgba(234,179,8,0.5)] border-yellow-400/50' : 'bg-gray-700 text-gray-500'} rounded-lg font-black text-sm transition-all border">
-                            ${canReg ? '✨ 도감에 영구 등록하기 (무기 소멸)' : '조건 미달성 (모루 확인)'}
+                            ${btnText}
                         </button>
                     ` : ''}
                 </div>
@@ -1319,36 +1340,59 @@
         updateTimers(); // 즉시 타이머 반영
     }
 
-    function renderQuests() {
-        const list = document.getElementById('quest-list');
-        list.innerHTML = '';
-        state.quests.forEach((q, idx) => {
-            const item = ITEMS[q.targetId];
-            let canComplete = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
-            
-            list.innerHTML += `
-                <div class="bg-gray-800 p-4 rounded-xl flex flex-col border ${canComplete ? 'border-green-500 bg-green-900/20' : 'border-gray-700'} shadow-sm gap-3">
-                    <div class="min-w-0 w-full flex justify-between items-start">
-                        <div class="font-bold text-[14px] text-gray-200 mb-1 truncate">상인 길드 의뢰 #${idx+1}</div>
-                        <div class="text-[13px] text-yellow-400 font-bold shrink-0 text-right">보상: ${q.reward.toLocaleString()} G</div>
-                    </div>
-                    <div class="text-[12px] text-gray-400 flex items-center justify-between mt-1">
-                        <span class="truncate">조건: <span class="text-white font-bold">+${q.reqLevel} [${item.type}] ${item.name}</span> 이상</span>
-                        <button onclick="goToCraft('${q.targetId}')" class="btn-press shrink-0 bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-700/50 transition">🛠️ 바로가기</button>
-                    </div>
-                    <button onclick="completeQuest(${idx})" ${canComplete ? '' : 'disabled'} class="btn-press w-full py-2.5 mt-1 bg-gradient-to-b from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold text-sm shadow border border-green-500/30">납품하기</button>
-                </div>
-            `;
-        });
-    }
-
     function completeQuest(idx) {
         let q = state.quests[idx];
-        if(!state.anvil || state.anvil.id !== q.targetId || state.anvil.level < q.reqLevel) return;
+        
+        let validAnvil = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
+        let validInvIndex = state.inventory.findIndex(w => w.id === q.targetId && w.level >= q.reqLevel);
+        
+        if (validAnvil) {
+            state.anvil = null;
+        } else if (validInvIndex !== -1) {
+            state.inventory.splice(validInvIndex, 1);
+        } else {
+            return;
+        }
+
         state.gold += q.reward;
         addLog(`[납품 완료] 의뢰 보상 <span class="text-yellow-400 font-bold">${q.reward.toLocaleString()}G</span> 획득!`, 'text-green-400');
-        state.anvil = null;
         state.quests.splice(idx, 1);
+        updateUI();
+    }
+
+    function registerCollection(cId) {
+        let c = COLLECTIONS.find(x => x.id === cId);
+        if(!c || c.done) return;
+
+        let validAnvil = state.anvil && state.anvil.id === c.targetId && state.anvil.level >= c.reqLevel;
+        let validInvIndex = state.inventory.findIndex(w => w.id === c.targetId && w.level >= c.reqLevel);
+
+        if (validAnvil) {
+            state.anvil = null;
+        } else if (validInvIndex !== -1) {
+            state.inventory.splice(validInvIndex, 1);
+        } else {
+            addLog("[경고] 도감 등록 조건을 만족하는 무기가 모루나 보관함에 없습니다.", "text-red-400");
+            return;
+        }
+        
+        c.done = true;
+        if (!state.completedCollections) state.completedCollections = [];
+        state.completedCollections.push(cId);
+        
+        if(c.buff.type === 'successRate') state.buffs.successRate += c.buff.val;
+        if(c.buff.type === 'dispatchTime') state.buffs.dispatchTime *= c.buff.val;
+        if(c.buff.type === 'destroyReduce') state.buffs.destroyReduce += c.buff.val;
+        if(c.buff.type === 'sellBonus') state.buffs.sellBonus *= c.buff.val;
+        if(c.buff.type === 'rewardBonus') state.buffs.rewardBonus *= c.buff.val;
+        
+        addLog(`[도감] <span class="text-yellow-400 font-bold">'${c.title}'</span> 달성! 영구 패시브 획득.`, 'text-yellow-200 text-lg');
+        
+        // 유저가 확실하게 체감할 수 있도록 축하 팝업(alert) 추가
+        setTimeout(() => {
+            alert(`🎉 도감 '${c.title}' 등록 완료!\n영구 효과: ${c.desc} 획득`);
+        }, 100);
+
         updateUI();
     }
 
