@@ -64,6 +64,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="save-indicator" class="text-xs text-green-400 font-bold opacity-0 transition-opacity mr-2">💾 저장됨</span>
+                        <button onclick="buyBlessing()" class="btn-press text-[11px] bg-pink-900/40 hover:bg-pink-800/60 text-pink-300 px-3 py-1.5 rounded border border-pink-800/50 transition-colors font-bold shadow-sm">🌸 축복 구매 (1천만 G)</button>
                         <button onclick="openGuide()" class="btn-press text-[11px] bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 px-2.5 py-1.5 rounded border border-emerald-800/50 transition-colors font-bold shadow-sm">❓ 가이드</button>
                         <button onclick="exportSave()" class="btn-press text-[11px] bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 px-2.5 py-1.5 rounded border border-blue-800/50 transition-colors font-bold shadow-sm">📤 복사</button>
                         <button onclick="importSave()" class="btn-press text-[11px] bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 px-2.5 py-1.5 rounded border border-purple-800/50 transition-colors font-bold shadow-sm">📥 불러오기</button>
@@ -119,9 +120,9 @@
                             <span>
                                 <span id="anvil-base-price" class="text-yellow-400 font-black text-lg">0</span> 
                                 <span class="text-yellow-600 text-xs">G</span> 
-                                <span id="anvil-jackpot"></span>
                             </span>
                         </div>
+                        <div class="text-[10px] text-center mb-2" id="anvil-jackpot"></div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-gray-400 font-bold">순이익</span>
                             <span id="anvil-profit" class="font-black text-gray-400 text-sm tracking-wider">0 G</span>
@@ -258,7 +259,7 @@
             <!-- 시설 -->
             <div id="tab-facility" class="tab-content flex-1 min-h-0 p-4 bg-gray-900/50">
                 <div class="flex justify-between items-center mb-4 bg-gray-800 p-3 rounded-lg border border-gray-700 shadow-sm shrink-0">
-                    <p class="text-[12px] text-gray-400 font-medium leading-relaxed">자원을 투자하여 대장간과 용병단을 <span class="text-green-400 font-bold">영구적으로 업그레이드</span> 합니다.</p>
+                    <p class="text-[12px] text-gray-400 font-medium leading-relaxed">자원을 투자하여 대장간과 용병단을 <span class="text-green-400 font-bold">영구적으로 업그레이드</span> 합니다. (비용은 폭등합니다!)</p>
                 </div>
                 <div id="facility-list" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar"></div>
             </div>
@@ -267,7 +268,7 @@
             <div id="tab-quest" class="tab-content flex-1 min-h-0 p-5 bg-gray-900/50">
                 <div class="flex justify-between items-center mb-4 bg-gray-800 p-3 rounded-lg border border-gray-700 shrink-0">
                     <p class="text-xs text-gray-400 font-medium">모루의 무기를 상인에게 납품하세요.<br><span class="text-yellow-500 font-bold">보상: 상점 매입가의 3배</span></p>
-                    <button id="btn-refresh-quest" onclick="generateQuests(true)" class="btn-press text-xs bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-bold border border-gray-500 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">🔄 갱신</button>
+                    <button id="btn-refresh-quest" onclick="generateQuests(true)" class="btn-press text-xs bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-bold border border-gray-500 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">🔄 갱신 (1분)</button>
                 </div>
                 <div id="quest-list" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar"></div>
             </div>
@@ -299,29 +300,24 @@
             
             <div class="space-y-5 text-[14px] text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
                 <div>
-                    <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 (EV 1.01 잭팟 설계) 🔨</h3>
-                    <p>재료를 모아 무기를 만들고 강화하세요. <span class="text-red-400 font-bold">+5강부터 즉시 파괴 확률이 존재</span>하며, +9강 이후부터는 강화 비용이 <span class="text-yellow-300">현재 무기 가치의 10%</span>로 폭등합니다.</p>
-                    <p class="mt-1 font-bold text-teal-300">💡 [잭팟 팁] 1~9강 구간은 상점에 팔면 무조건 적자입니다! 상인 길드 의뢰(3배)를 통해서만 이득을 볼 수 있으며, 실패 확률을 뚫고 +10강 이상 진입 시 판매가가 기하급수적으로 폭등합니다!</p>
+                    <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 (살짝 적자 설계) 🔨</h3>
+                    <p>재료를 모아 무기를 만들고 강화하세요. <span class="text-red-400 font-bold">+5강부터 즉시 파괴 확률이 존재</span>하며, +9강 이후부터는 강화 비용이 <span class="text-yellow-300">현재 무기 가치의 10%</span>로 적용됩니다.</p>
+                    <p class="mt-1 font-bold text-teal-300">💡 [주의] 모든 강화는 상점 판매 시 '살짝 적자(2% 내외)'를 보도록 설계되었습니다. 반드시 의뢰(3배)와 파견을 통해 이득을 챙겨야 합니다!</p>
                 </div>
                 
                 <div>
-                    <h3 class="text-white font-bold text-base mb-1">2. 용병 파견과 대성공! 🏃‍♂️</h3>
-                    <p>만든 무기를 용병에게 장착시켜 던전을 탐색하세요.</p>
-                    <div class="bg-gray-900 p-2 rounded mt-1 text-[12px] font-bold text-blue-300 text-center border border-gray-700">
-                        💧수 ➔ 🔥화 ➔ ❄️빙 ➔ ⚡뇌 ➔ 💧수<br>
-                        <span class="text-purple-400">🔮암</span> ↔️ <span class="text-yellow-400">✨명</span> (서로 약점)
-                    </div>
-                    <p class="mt-2">던전 약점을 찌르면 탐색 시간이 <span class="text-green-400 font-bold">50% 단축</span>됩니다. 파견 시 일정 확률로 <span class="text-yellow-400 font-bold">대성공</span>이 발생하여 훨씬 많은 골드와 재료를 얻을 수 있습니다!</p>
+                    <h3 class="text-white font-bold text-base mb-1">2. 용병 파견 대폭 개편! 🏃‍♂️</h3>
+                    <p>고강화 잭팟 무기를 들고 파견을 가면, 무기의 가치에 비례하여 <span class="text-yellow-400 font-bold">막대한 수량의 골드를 쓸어 담습니다.</span> 던전 약점을 찌르면 탐색 시간이 50% 단축되며, 대성공 시 엄청난 보상을 받습니다.</p>
                 </div>
 
                 <div>
-                    <h3 class="text-white font-bold text-base mb-1">3. 무기 특성과 수명(내구도) ⚔️</h3>
-                    <p>무기마다 고유의 특성이 있습니다. (예: 🔪단검은 속도 단축, 🛡️방패는 내구도 보너스 등). <br><span class="text-red-400 font-bold">주의:</span> 용병이 무기를 수리할 때마다 <b>최대 내구도(수명)가 1씩 깎입니다.</b> 또한, 잭팟 배율이 터진 고강화 무기는 수리비도 비싸지므로 적당한 시점에 상인에게 납품하는 것이 핵심입니다!</p>
+                    <h3 class="text-white font-bold text-base mb-1">3. 시설 투자와 축복 구매 💰</h3>
+                    <p>후반부로 갈수록 시설 업그레이드 비용이 기하급수적으로 증가합니다. 또한 모은 골드로 <span class="text-pink-400 font-bold">상단에서 [여신의 축복]을 1천만 골드에 직접 구매</span>하여 +20강 신화 무기에 도전할 수 있습니다!</p>
                 </div>
 
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">4. 의뢰와 보상 💰</h3>
-                    <p>무기를 상점에 바로 팔기보다 <span class="text-yellow-400 font-bold">[📋 의뢰] 탭에서 납품하면 3배의 골드</span>를 얻습니다. 모은 골드로 ⛺시설을 업그레이드하고 📖도감을 채워 영구 버프를 얻으세요.</p>
+                    <p>초반 성장의 핵심입니다. 상점에 바로 팔면 적자이므로, <span class="text-yellow-400 font-bold">[📋 의뢰] 탭에서 납품하여 3배의 골드</span>를 얻으세요. 의뢰는 1분마다 갱신됩니다.</p>
                 </div>
             </div>
             
@@ -402,14 +398,15 @@
         { id: 'c6', targetId: '대검_t7', reqLevel: 15, title: '마검사의 영혼', desc: '강화 성공률 5% 추가 증가', buff: { type: 'successRate', val: 0.05 }, done: false },
     ];
 
+    // 🏗️ 시설 업그레이드 비용 기하급수적 스케일링 (최대 레벨 확장)
     const FACILITIES = {
-        'hammer': { id: 'hammer', name: '미스릴 망치', icon: '🔨', desc: '기본 강화 성공률 +1%', max: 5, getCost: (lv) => ({ gold: 50000 * (lv+1), mat: 'iron', matName: '🪨철광석', matCost: 80 * (lv+1) }) },
-        'bellows': { id: 'bellows', name: '고블린 풀무', icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 3, getCost: (lv) => ({ gold: 100000 * (lv+1), mat: 'fire', matName: '🔥화염석', matCost: 40 * (lv+1) }) },
-        'vault': { id: 'vault', name: '비밀 금고', icon: '🧰', desc: '보관함 최대 칸수 +5칸', max: 4, getCost: (lv) => ({ gold: 150000 * (lv+1), mat: 'water', matName: '💧심해수', matCost: 40 * (lv+1) }) },
-        'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -5%, 보상 +10%', max: 5, getCost: (lv) => ({ gold: 200000 * (lv+1), mat: 'dark', matName: '🔮심연의혼', matCost: 25 * (lv+1) }) }
+        'hammer': { id: 'hammer', name: '미스릴 망치', icon: '🔨', desc: '기본 강화 성공률 +1%', max: 10, getCost: (lv) => ({ gold: 50000 * Math.pow(3, lv), mat: 'iron', matName: '🪨철광석', matCost: 80 * (lv+1) * 2 }) },
+        'bellows': { id: 'bellows', name: '고블린 풀무', icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 5, getCost: (lv) => ({ gold: 100000 * Math.pow(3, lv), mat: 'fire', matName: '🔥화염석', matCost: 40 * (lv+1) * 2 }) },
+        'vault': { id: 'vault', name: '비밀 금고', icon: '🧰', desc: '보관함 최대 칸수 +5칸', max: 10, getCost: (lv) => ({ gold: 150000 * Math.pow(3, lv), mat: 'water', matName: '💧심해수', matCost: 40 * (lv+1) * 2 }) },
+        'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -2%, 보상 +5%', max: 10, getCost: (lv) => ({ gold: 200000 * Math.pow(3, lv), mat: 'dark', matName: '🔮심연의혼', matCost: 25 * (lv+1) * 2 }) }
     };
 
-    // 🎰 '1% 잭팟' 공식 적용: 유저가 제시한 완벽한 확률 배분
+    // 🎰 확률: 유저 제시 확률 그대로 유지
     const BASE_RATES = [
         { s: 1.00, m: 0.00, d: 0.00 }, // 0->1
         { s: 0.90, m: 0.10, d: 0.00 }, // 1->2
@@ -420,8 +417,8 @@
         { s: 0.40, m: 0.55, d: 0.05 }, // 6->7
         { s: 0.35, m: 0.60, d: 0.05 }, // 7->8
         { s: 0.32, m: 0.62, d: 0.06 }, // 8->9
-        { s: 0.30, m: 0.63, d: 0.07 }, // 9->10 (제시된 확률 적용)
-        { s: 0.25, m: 0.65, d: 0.10 }, // 10->11 (하락 없이 파괴+유지만)
+        { s: 0.30, m: 0.63, d: 0.07 }, // 9->10 
+        { s: 0.25, m: 0.65, d: 0.10 }, // 10->11 
         { s: 0.22, m: 0.68, d: 0.10 }, // 11->12
         { s: 0.20, m: 0.69, d: 0.11 }, // 12->13
         { s: 0.18, m: 0.71, d: 0.11 }, // 13->14
@@ -531,7 +528,19 @@
         document.getElementById('guide-modal').classList.remove('flex');
     }
 
-    // --- 3. 코어 계산 로직 ---
+    // 🌸 여신의 축복 상점 구매 로직
+    function buyBlessing() {
+        const cost = 10000000; // 1,000만 골드
+        if(state.gold < cost) {
+            addLog(`[경고] 축복을 구매하기 위한 골드가 부족합니다. (필요: 1,000만 G)`, "text-red-400");
+            return;
+        }
+        state.gold -= cost;
+        state.blessings++;
+        addLog(`[아이템 획득] 상단에서 막대한 골드를 지불하고 🌸 여신의 축복을 1개 구매했습니다!`, "text-pink-400 font-bold");
+        updateUI();
+    }
+
     function getWeaponColor(level, rarity) {
         if (level >= 20) return "text-red-500 font-black mythic-glow";
         if (level >= 15) return "text-orange-400 font-black drop-shadow-md";
@@ -540,39 +549,38 @@
         return rarity >= 7 ? 'text-yellow-400' : (rarity >= 5 ? 'text-purple-400' : 'text-gray-200');
     }
 
-    // 💸 동적 가치(Base Value) 산출 로직: EV 1.01 잭팟 모델 + 초반 구간 거품 제거
+    // 💸 동적 가치(Base Value) 산출 로직: EV 0.98 (살짝 적자) 모델
     function getBaseValue(weaponId, level) {
         const item = ITEMS[weaponId];
-        // 0~9강 구간: 상점 판매는 적자, 의뢰(3배)를 해야 겨우 이득을 보는 2.3제곱으로 거품 제거
+        // 0~9강 구간: 의뢰 없이는 무조건 적자나도록 거품 제거 곡선 유지
         let val = item.basePrice + Math.floor(Math.pow(level, 2.3) * 15 * (item.rarity * 0.5));
         
-        // 10강 이상부터는 1% 이득 공식을 역산한 누적 배율 적용
-        const evMultipliers = [
-            1.60, // 10강
-            1.84, // 11강
-            1.95, // 12강
-            2.10, // 13강
-            2.22, // 14강
-            2.54, // 15강
-            2.92, // 16강
-            3.41, // 17강
-            4.01, // 18강
-            5.18, // 19강
-            7.52  // 20강
+        // 10강 이상: 100회 돌리면 약간 적자(0.98)가 나도록 역산된 잭팟 배율 적용
+        const evDeficitMultipliers = [
+            1.50, // 10강 (이전 1.60 -> 1.50)
+            1.72, // 11강
+            1.81, // 12강
+            1.95, // 13강
+            2.05, // 14강
+            2.33, // 15강
+            2.66, // 16강
+            3.10, // 17강
+            3.62, // 18강
+            4.66, // 19강
+            6.75  // 20강 (이전 7.52 -> 6.75)
         ];
         
         if (level >= 10) {
-            // 9강의 가치를 기준으로 곱연산 시작
             let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.3) * 15 * (item.rarity * 0.5));
             val = valAt9;
             for (let i = 10; i <= level; i++) {
-                val = Math.floor(val * evMultipliers[i - 10]);
+                val = Math.floor(val * evDeficitMultipliers[i - 10]);
             }
         }
         return val;
     }
 
-    // 💰 강화 비용: 9강 이상부터는 "현재 무기 가치의 정확히 10%"
+    // 💰 강화 비용: 9강 이상부터는 "현재 무기 가치의 정확히 10%" (자산 소모 뼈대)
     function getUpgradeCost(weapon) {
         if (weapon.level >= 9) {
             return Math.floor(getBaseValue(weapon.id, weapon.level) * 0.10);
@@ -582,7 +590,7 @@
         }
     }
 
-    // 💰 최종 판매가 (도감 및 시설 보너스 합산)
+    // 💰 최종 상점 판매가
     function getSellPrice(weapon) {
         let price = getBaseValue(weapon.id, weapon.level);
         return Math.floor(price * state.buffs.sellBonus);
@@ -616,7 +624,7 @@
         time *= WEAPON_TYPES[item.type].timeMod;
         time *= state.buffs.dispatchTime;
         
-        let mercTimeBonus = 1 - (state.facilities.mercenary * 0.05);
+        let mercTimeBonus = 1 - (state.facilities.mercenary * 0.02); // 1렙당 2%로 조정
         time *= mercTimeBonus;
 
         return Math.max(3, Math.floor(time)); 
@@ -694,9 +702,9 @@
             let totalCost = state.anvil.totalCost || 0;
             let profit = sellPrice - totalCost;
 
-            // 잭팟 텍스트 표시 연동 (EV 모델)
+            // 잭팟 텍스트 표시 연동 (의미 부여)
             let milestoneText = "";
-            if (state.anvil.level >= 20) milestoneText = " <span class='text-red-500 text-xs font-black animate-pulse'>[절대무기]</span>";
+            if (state.anvil.level >= 20) milestoneText = " <span class='text-red-500 text-xs font-black animate-pulse'>[절대무기] (파견 시 막대한 골드)</span>";
             else if (state.anvil.level >= 15) milestoneText = " <span class='text-orange-500 text-xs font-black animate-pulse'>[신화급 가치]</span>";
             else if (state.anvil.level >= 10) milestoneText = " <span class='text-purple-400 text-xs font-black'>[영웅급 가치]</span>";
             document.getElementById('anvil-jackpot').innerHTML = milestoneText;
@@ -769,7 +777,11 @@
             
             document.getElementById('btn-dispatch').disabled = state.merc.weapon.dur <= 0 || state.merc.isDispatching;
             
-            let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 2.2) * 20 * item.rarity);
+            // 🛠️ 수리비 다이내믹 스케일링 (무기 현재 가치의 1%)
+            let weaponCurrentValue = getBaseValue(state.merc.weapon.id, state.merc.weapon.level);
+            let repairCost = Math.floor(weaponCurrentValue * 0.01);
+            if (repairCost < 10) repairCost = 10; // 최소 수리비 방어
+
             if (wMaxDur <= 1) {
                 btnRepair.innerText = `💀 수리 불가 (수명 다함)`;
                 btnRepair.disabled = true;
@@ -844,7 +856,7 @@
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
-                btn.innerText = `🔄 갱신`;
+                btn.innerText = `🔄 갱신 (1분)`;
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
@@ -1045,6 +1057,7 @@
         });
     }
 
+    // --- 5. 자유 스왑 & 액션 로직 ---
     function craftWeapon(itemId) {
         const item = ITEMS[itemId];
         if(state.gold < item.gold) return;
@@ -1210,7 +1223,10 @@
         if(wMaxDur <= 1) { addLog("[경고] 무기의 수명이 다하여 더 이상 수리할 수 없습니다.", "text-red-400"); return; }
         if(state.merc.weapon.dur >= wMaxDur) return;
         
-        let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 2.2) * 20 * item.rarity);
+        let weaponCurrentValue = getBaseValue(state.merc.weapon.id, state.merc.weapon.level);
+        let repairCost = Math.floor(weaponCurrentValue * 0.01);
+        if (repairCost < 10) repairCost = 10;
+        
         if(state.gold < repairCost) { addLog("[경고] 수리할 골드가 부족합니다.", "text-red-400"); return; }
         
         state.gold -= repairCost;
@@ -1353,9 +1369,12 @@
             if (w.level > region.recLevel) greatSuccessChance += (w.level - region.recLevel) * 0.02;
             let isGreatSuccess = Math.random() < greatSuccessChance;
 
-            let mercRewardBonus = 1 + (state.facilities.mercenary * 0.1);
-            let goldReward = region.rewardG + Math.floor(Math.pow(w.level, 1.6) * 30);
-            goldReward = Math.floor(goldReward * WEAPON_TYPES[item.type].rewardMod * state.buffs.rewardBonus * mercRewardBonus);
+            // 💰 파견 적자 완벽 해결: 무기 가치 비례 골드 획득 (가치의 약 5%)
+            let weaponValue = getBaseValue(w.id, w.level);
+            let baseGoldGain = Math.floor(weaponValue * 0.05) + region.rewardG;
+
+            let mercRewardBonus = 1 + (state.facilities.mercenary * 0.05); // 시설 1렙당 5%
+            let goldReward = Math.floor(baseGoldGain * WEAPON_TYPES[item.type].rewardMod * state.buffs.rewardBonus * mercRewardBonus);
             
             if (isGreatSuccess) {
                 goldReward = Math.floor(goldReward * 1.5);
@@ -1405,7 +1424,8 @@
                 addLog("[경고] 아직 상인 길드에 의뢰를 요청할 수 없습니다.", "text-red-400");
                 return;
             }
-            state.nextQuestRefresh = Date.now() + (3 * 60 * 1000);
+            // ⏳ 의뢰 쿨타임 1분으로 대폭 축소 (뉴비 폐사 방지)
+            state.nextQuestRefresh = Date.now() + (1 * 60 * 1000);
             addLog("[의뢰] 상인 길드에 새로운 의뢰 목록을 요청했습니다.", "text-blue-300 font-bold");
         }
 
