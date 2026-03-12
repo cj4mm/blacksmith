@@ -26,7 +26,6 @@
             40%, 60% { transform: translate3d(8px, 0, 0); }
         }
         
-        /* 탭 가시성 버그 완벽 수정 */
         .tab-content { display: none !important; }
         .tab-content.active { display: flex !important; flex-direction: column; }
         
@@ -117,7 +116,11 @@
                         </div>
                         <div class="flex justify-between items-center text-sm border-b border-gray-600 pb-2 mb-2">
                             <span class="text-gray-300 font-bold">상점 매입가</span>
-                            <span><span id="anvil-base-price" class="text-yellow-400 font-black text-lg">0</span> <span class="text-yellow-600 text-xs">G</span></span>
+                            <span>
+                                <span id="anvil-base-price" class="text-yellow-400 font-black text-lg">0</span> 
+                                <span class="text-yellow-600 text-xs">G</span> 
+                                <span id="anvil-jackpot"></span>
+                            </span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-gray-400 font-bold">순이익</span>
@@ -298,6 +301,7 @@
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 🔨</h3>
                     <p>재료를 모아 무기를 만들고 모루에서 강화하세요. <span class="text-red-400 font-bold">+10강부터는 파괴 확률이 존재</span>하며, '🌸여신의 축복'을 체크하여 파괴를 1회 막을 수 있습니다 (단계만 1 하락).</p>
+                    <p class="mt-1 text-yellow-300 font-bold">💡 [팁] +7강, +10강, +15강 도달 시 상점 판매가가 엄청난 배율로 폭등합니다!</p>
                 </div>
                 
                 <div>
@@ -348,7 +352,6 @@
         'light': { text: '✨명속성', class: 'bg-elem-light', reqMat: 'light', namePrefix: ['성기사의 ', '신성한 '] }
     };
 
-    // 대성공 드랍률 증가에 따른 제작 재료 요구치 스케일링 상향
     const TIERS = [
         { elem: 'none', rarity: 1, gold: 100, mats: 0, basePrice: 50 },
         { elem: 'none', rarity: 2, gold: 300, mats: 5, basePrice: 150 }, 
@@ -399,7 +402,6 @@
         { id: 'c6', targetId: '대검_t7', reqLevel: 15, title: '마검사의 영혼', desc: '강화 성공률 5% 추가 증가', buff: { type: 'successRate', val: 0.05 }, done: false },
     ];
 
-    // 대성공 드랍률 증가에 따른 시설 필요 재료량 상향
     const FACILITIES = {
         'hammer': { id: 'hammer', name: '미스릴 망치', icon: '🔨', desc: '기본 강화 성공률 +1%', max: 5, getCost: (lv) => ({ gold: 50000 * (lv+1), mat: 'iron', matName: '🪨철광석', matCost: 80 * (lv+1) }) },
         'bellows': { id: 'bellows', name: '고블린 풀무', icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 3, getCost: (lv) => ({ gold: 100000 * (lv+1), mat: 'fire', matName: '🔥화염석', matCost: 40 * (lv+1) }) },
@@ -407,17 +409,32 @@
         'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -5%, 보상 +10%', max: 5, getCost: (lv) => ({ gold: 200000 * (lv+1), mat: 'dark', matName: '🔮심연의혼', matCost: 25 * (lv+1) }) }
     };
 
+    // 강화 확률 패치 (지옥구간 완화, 신화구간 소폭 상향)
     const BASE_RATES = [
-        { s: 1.00, m: 0.00, d: 0.00 }, { s: 0.90, m: 0.10, d: 0.00 }, { s: 0.90, m: 0.10, d: 0.00 },
-        { s: 0.80, m: 0.20, d: 0.00 }, { s: 0.80, m: 0.20, d: 0.00 }, { s: 0.70, m: 0.30, d: 0.00 },
-        { s: 0.60, m: 0.40, d: 0.00 }, { s: 0.50, m: 0.45, d: 0.05 }, { s: 0.45, m: 0.50, d: 0.05 },
-        { s: 0.40, m: 0.55, d: 0.05 }, { s: 0.40, m: 0.50, d: 0.10 }, { s: 0.38, m: 0.52, d: 0.10 },
-        { s: 0.35, m: 0.55, d: 0.10 }, { s: 0.32, m: 0.58, d: 0.10 }, { s: 0.28, m: 0.62, d: 0.10 },
-        { s: 0.12, m: 0.78, d: 0.10 }, { s: 0.10, m: 0.80, d: 0.10 }, { s: 0.08, m: 0.82, d: 0.10 },
-        { s: 0.06, m: 0.84, d: 0.10 }, { s: 0.04, m: 0.85, d: 0.11 }
+        { s: 1.00, m: 0.00, d: 0.00 }, // 0->1
+        { s: 0.90, m: 0.10, d: 0.00 }, // 1->2
+        { s: 0.90, m: 0.10, d: 0.00 }, // 2->3
+        { s: 0.80, m: 0.20, d: 0.00 }, // 3->4
+        { s: 0.80, m: 0.20, d: 0.00 }, // 4->5
+        { s: 0.70, m: 0.30, d: 0.00 }, // 5->6
+        { s: 0.60, m: 0.40, d: 0.00 }, // 6->7
+        { s: 0.50, m: 0.45, d: 0.05 }, // 7->8
+        { s: 0.45, m: 0.50, d: 0.05 }, // 8->9
+        { s: 0.40, m: 0.55, d: 0.05 }, // 9->10
+        // --- 지옥 구간 ---
+        { s: 0.40, m: 0.53, d: 0.07 }, // 10->11 (파괴율 10% -> 7% 하향)
+        { s: 0.38, m: 0.55, d: 0.07 }, // 11->12 
+        { s: 0.35, m: 0.58, d: 0.07 }, // 12->13
+        { s: 0.32, m: 0.61, d: 0.07 }, // 13->14
+        { s: 0.28, m: 0.65, d: 0.07 }, // 14->15
+        // --- 신화 구간 ---
+        { s: 0.15, m: 0.75, d: 0.10 }, // 15->16 (성공률 12% -> 15% 상향)
+        { s: 0.12, m: 0.78, d: 0.10 }, // 16->17 (성공률 10% -> 12% 상향)
+        { s: 0.10, m: 0.80, d: 0.10 }, // 17->18 (성공률 8% -> 10% 상향)
+        { s: 0.08, m: 0.82, d: 0.10 }, // 18->19 (성공률 6% -> 8% 상향)
+        { s: 0.05, m: 0.83, d: 0.12 }  // 19->20 (성공률 4% -> 5% 상향)
     ];
 
-    // --- 2. 게임 상태 및 저장/불러오기 로직 ---
     let state = {
         gold: 1000,
         mats: { iron: 0, water: 0, fire: 0, ice: 0, lightn: 0, dark: 0, light: 0 },
@@ -530,9 +547,19 @@
         return Math.floor(item.gold * 0.3) + Math.floor(Math.pow(weapon.level, 1.9) * 12 * (item.rarity * 0.6));
     }
 
+    // 잭팟 시스템 적용된 판매가 로직
     function getSellPrice(weapon) {
         const item = ITEMS[weapon.id];
         let price = item.basePrice + Math.floor(Math.pow(weapon.level, 2.6) * 15 * (item.rarity * 0.5));
+        
+        // 💰 도파민 패치: 고강화 잭팟 배율 적용
+        let milestoneMultiplier = 1.0;
+        if (weapon.level >= 20) milestoneMultiplier = 10.0;
+        else if (weapon.level >= 15) milestoneMultiplier = 4.0;
+        else if (weapon.level >= 10) milestoneMultiplier = 2.0;
+        else if (weapon.level >= 7) milestoneMultiplier = 1.2;
+
+        price = Math.floor(price * milestoneMultiplier);
         return Math.floor(price * state.buffs.sellBonus);
     }
 
@@ -641,6 +668,14 @@
             let sellPrice = getSellPrice(state.anvil);
             let totalCost = state.anvil.totalCost || 0;
             let profit = sellPrice - totalCost;
+
+            // 잭팟 텍스트 표시 연동
+            let milestoneText = "";
+            if (state.anvil.level >= 20) milestoneText = " <span class='text-red-500 text-xs font-black animate-pulse'>[x10 잭팟]</span>";
+            else if (state.anvil.level >= 15) milestoneText = " <span class='text-orange-500 text-xs font-black animate-pulse'>[x4 잭팟]</span>";
+            else if (state.anvil.level >= 10) milestoneText = " <span class='text-purple-400 text-xs font-black'>[x2 잭팟]</span>";
+            else if (state.anvil.level >= 7) milestoneText = " <span class='text-blue-400 text-xs font-black'>[x1.2]</span>";
+            document.getElementById('anvil-jackpot').innerHTML = milestoneText;
 
             document.getElementById('anvil-base-price').innerText = sellPrice.toLocaleString();
             document.getElementById('anvil-total-cost').innerText = totalCost.toLocaleString();
@@ -1279,7 +1314,6 @@
         if (Math.random() < failChance) {
             addLog(`[토벌 실패] 용병이 몬스터에게 패배하여 도망쳤습니다.`, 'text-red-500 font-bold');
         } else {
-            // 대성공 여부 판별 (기본 20% + 레벨 격차 비례)
             let greatSuccessChance = 0.20;
             if (w.level > region.recLevel) greatSuccessChance += (w.level - region.recLevel) * 0.02;
             let isGreatSuccess = Math.random() < greatSuccessChance;
@@ -1288,7 +1322,6 @@
             let goldReward = region.rewardG + Math.floor(Math.pow(w.level, 1.6) * 30);
             goldReward = Math.floor(goldReward * WEAPON_TYPES[item.type].rewardMod * state.buffs.rewardBonus * mercRewardBonus);
             
-            // 대성공 골드 1.5배 뻥튀기
             if (isGreatSuccess) {
                 goldReward = Math.floor(goldReward * 1.5);
             }
@@ -1298,10 +1331,7 @@
             let dropMsg = '';
             
             if (region.dropMat) {
-                // 재료 드랍 개수 로직: 성공 시 2~3개, 대성공 시 4~6개 확정
                 let matCount = isGreatSuccess ? (Math.floor(Math.random() * 3) + 4) : (Math.floor(Math.random() * 2) + 2);
-                
-                // 무기군 특성(지팡이 등) 드랍 배율을 개수에 직접 적용
                 matCount = Math.max(1, Math.round(matCount * WEAPON_TYPES[item.type].dropMod));
 
                 state.mats[region.dropMat] += matCount;
@@ -1309,7 +1339,6 @@
                 dropMsg = ` 및 <span class="text-white bg-white/20 px-1.5 py-0.5 rounded shadow-sm">${mName} x${matCount}</span> 획득!`;
             }
             
-            // 즉시 완료권 드랍 로직 (대성공 시 확률 2배)
             let ticketChance = 0.03 + (regionIndex * 0.02);
             if (isGreatSuccess) ticketChance *= 2; 
             if (Math.random() < ticketChance) {
