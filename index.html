@@ -301,7 +301,7 @@
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 🔨</h3>
                     <p>재료를 모아 무기를 만들고 모루에서 강화하세요. <span class="text-red-400 font-bold">+10강부터는 파괴 확률이 존재</span>하며, '🌸여신의 축복'을 체크하여 파괴를 1회 막을 수 있습니다 (단계만 1 하락).</p>
-                    <p class="mt-1 text-yellow-300 font-bold">💡 [팁] +7강, +10강, +15강 도달 시 상점 판매가가 엄청난 배율로 폭등합니다!</p>
+                    <p class="mt-1 text-yellow-300 font-bold">💡 [팁] +7강, +10강, +15강 도달 시 상점 판매가가 엄청난 배율로 폭등하며, 최대 내구도(수명)도 영구 증가합니다!</p>
                 </div>
                 
                 <div>
@@ -1069,7 +1069,20 @@
 
         if (rand < sRate) {
             state.anvil.level++;
-            state.anvil.dur = state.anvil.maxDur || ITEMS[state.anvil.id].maxDur; 
+            
+            // 내구도(수명) 잭팟 상승 로직
+            let durBonus = 0;
+            if (state.anvil.level === 7) durBonus = 2;
+            else if (state.anvil.level === 10) durBonus = 3;
+            else if (state.anvil.level === 15) durBonus = 5;
+            else if (state.anvil.level === 20) durBonus = 10;
+
+            if (durBonus > 0) {
+                state.anvil.maxDur += durBonus;
+                addLog(`[내구도 상승] ✨ +${state.anvil.level}강 돌파! 최대 내구도(수명)가 ${durBonus} 증가했습니다.`, 'text-cyan-400 font-bold');
+            }
+
+            state.anvil.dur = state.anvil.maxDur; // 100% 회복
             addLog(`[성공] 챙!! 무기가 <span class="font-bold">+${state.anvil.level}</span> (으)로 강화됨! (내구도 100% 회복)`, 'text-green-400');
             if(state.anvil.level >= 15) addLog(`[신화] 무기가 신화적인 빛을 뿜어냅니다!!!`, 'text-orange-400 font-black text-lg');
             document.getElementById('use-blessing').checked = false;
@@ -1102,7 +1115,7 @@
 
     function equipToMercFromAnvil() {
         if(!state.anvil) return;
-        if(state.merc.isDispatching) { addLog("[경고] 파견 중에는 무기를 바꿀 수 없습니다.", "text-red-400"); return; }
+        if(state.merc.isDispatching) { addLog("[경고] 파견 중에는 무기를 바꿀 수 জ্ঞ니다.", "text-red-400"); return; }
         
         let temp = state.merc.weapon;
         state.merc.weapon = { ...state.anvil };
