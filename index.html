@@ -73,7 +73,7 @@
                         <span class="text-3xl drop-shadow-md">💰</span>
                         <span id="ui-gold" class="text-3xl font-black text-yellow-400 tracking-wide">1,000</span> <span class="text-yellow-600 font-bold">G</span>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap justify-end items-center gap-2">
                         <span id="save-indicator" class="text-xs text-green-400 font-bold opacity-0 transition-opacity mr-2">💾 저장됨</span>
                         <button onclick="buyBlessing()" class="btn-press text-[11px] bg-pink-900/40 hover:bg-pink-800/60 text-pink-300 px-3 py-1.5 rounded border border-pink-800/50 transition-colors font-bold shadow-sm">🌸 축복 구매 (1천만 G)</button>
                         <button onclick="openGuide()" class="btn-press text-[11px] bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 px-2.5 py-1.5 rounded border border-emerald-800/50 transition-colors font-bold shadow-sm">❓ 가이드</button>
@@ -167,7 +167,7 @@
             </h2>
             
             <div id="merc-idle" class="flex flex-col flex-1">
-                <div class="mb-5 bg-gray-900/80 p-5 rounded-xl border border-gray-700 shadow-inner flex flex-col">
+                <div class="mb-5 bg-gray-900/80 p-5 rounded-xl border border-gray-700 shadow-inner flex flex-col shrink-0">
                     <div class="text-xs text-purple-300 font-bold mb-2 uppercase tracking-wider">현재 장착된 무기</div>
                     <div class="flex items-center gap-2 mb-3 min-w-0">
                         <span id="merc-weapon-name" class="font-black text-2xl text-gray-500 truncate">맨손 (장착 없음)</span>
@@ -217,7 +217,7 @@
                     </div>
                     <span id="dispatch-time-text" class="absolute inset-0 flex items-center justify-center text-sm font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,1)] tracking-widest">--</span>
                 </div>
-                <button id="btn-instant-complete" onclick="useInstantTicket()" class="mt-6 btn-press px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-indigo-400/50 hidden">
+                <button id="btn-instant-complete" onclick="useInstantTicket()" class="mt-6 btn-press px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-indigo-400/50 hidden transition-all">
                     ⏩ 즉시 완료 (보유: <span id="ui-ticket-btn-count">0</span>)
                 </button>
             </div>
@@ -244,7 +244,6 @@
 
             <!-- 제작 -->
             <div id="tab-craft" class="tab-content flex-1 p-4 bg-gray-900/50 overflow-y-auto custom-scrollbar">
-                <!-- JS에서 동적으로 채움 -->
                 <select id="craft-filter" onchange="renderCraftList()" class="w-full bg-black/60 border border-gray-600 rounded-lg p-3 text-sm text-white mb-3 font-bold outline-none shrink-0"></select>
                 <div id="craft-list" class="space-y-3"></div>
             </div>
@@ -292,7 +291,7 @@
                 <p>2. <b>장인 숙련도:</b> 무기를 상점에 팔면 장인 경험치를 얻고, 장인 레벨이 오를수록 <b>모든 강화 성공률이 영구적으로 상승</b>합니다.</p>
                 <p>3. <b>무기 해금:</b> 게임 진행(특정 지역 탐색, 장인 레벨업 등)에 따라 새로운 무기군이 해금되며, <b>첫 제작 시 50% 파격 할인</b>을 받습니다.</p>
                 <p>4. <b>무기 유틸리티:</b> 단검(재료), 방패(내구도), 지팡이(축복), 너클(대성공), 낫(하이리스크 고수익) 등 전략적으로 장착하여 던전을 공략하세요.</p>
-                <p>5. <b>경제:</b> 10강 이상 무기는 파견 시 잭팟 배율이 적용되어 막대한 골드를 벌어옵니다. 남는 무기는 <b>의뢰(2.8배)</b>로 납품하세요.</p>
+                <p>5. <b>경제:</b> 고강화/고레어 무기는 파견 보상 계수가 크게 올라갑니다. 남는 무기는 <b>의뢰(2.8배)</b>로 납품하세요.</p>
             </div>
             <button onclick="closeGuide()" class="btn-press mt-6 w-full py-3.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-bold shadow border border-gray-500 transition">알겠습니다!</button>
         </div>
@@ -320,6 +319,9 @@
         'dark': { text: '🔮암속성', class: 'bg-elem-dark', reqMat: 'dark', namePrefix: ['칠흑의 ', '나락의 '] },
         'light': { text: '✨명속성', class: 'bg-elem-light', reqMat: 'light', namePrefix: ['성기사의 ', '신성한 '] }
     };
+
+    const raritySellWeight = { 1: 1.32, 2: 1.24, 3: 1.14, 4: 1.08, 5: 1.00, 6: 0.95, 7: 0.91, 8: 0.88 };
+    const rarityCostCoeff = { 1: 0.17, 2: 0.18, 3: 0.20, 4: 0.22, 5: 0.24, 6: 0.26, 7: 0.28, 8: 0.30 };
 
     const getMatInfo = (key) => {
         const matMap = {
@@ -391,10 +393,13 @@
 
     // --- 2. 상태 관리 ---
     let state = {
-        gold: 1000, artisanExp: 0, artisanLevel: 1, mats: { iron: 0, water: 0, fire: 0, ice: 0, lightn: 0, dark: 0, light: 0 },
-        blessings: 0, tickets: 0, facilities: { hammer: 0, bellows: 0, vault: 0, mercenary: 0 },
+        gold: 1000, artisanExp: 0, artisanLevel: 1, 
+        mats: { iron: 0, water: 0, fire: 0, ice: 0, lightn: 0, dark: 0, light: 0 },
+        blessings: 0, tickets: 0, 
+        facilities: { hammer: 0, bellows: 0, vault: 0, mercenary: 0 },
         buffs: { successRate: 0, destroyReduce: 0, dispatchTime: 1.0, sellBonus: 1.0, rewardBonus: 1.0 },
-        anvil: null, inventory: [], merc: { weapon: null, isDispatching: false, regionId: null, startTime: 0, endTime: 0, maxTimer: 0 },
+        anvil: null, inventory: [], 
+        merc: { weapon: null, isDispatching: false, regionId: null, startTime: 0, endTime: 0, maxTimer: 0 },
         quests: [], completedCollections: [], nextQuestRefresh: 0,
         unlockedWeapons: ['검', '단검'],
         history: { forestSuccess: 0, maxUpgrade: 0, greatSuccess: 0, questCompleted: 0 },
@@ -402,12 +407,10 @@
     };
 
     let dispatchInterval = null;
+    const SAVE_KEY = 'blacksmith_master_vfinal_clean_save';
 
-    // --- 3. 핵심 유틸리티 (수치 반영 수정본) ---
-    function safeSetText(id, text) { 
-        const el = document.getElementById(id); 
-        if (el) el.innerText = text; 
-    }
+    // --- 3. 핵심 유틸리티 ---
+    function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
 
     function addLog(m, c="text-gray-300") {
         const l = document.getElementById('ui-log'); if(!l) return;
@@ -425,31 +428,27 @@
         return r >= 7 ? 'text-yellow-400' : (r >= 5 ? 'text-purple-400' : 'text-gray-200'); 
     }
 
-    // ⭐ 요청받은 새로운 가치 산정 공식 반영
     function getBaseValue(id, level) {
         const item = ITEMS[id];
-        // Math.pow(level, 2.6) * 18 * (item.rarity * 0.55) 로 가치 증가량 상향
-        let val = item.basePrice + Math.floor(Math.pow(level, 2.6) * 18 * (item.rarity * 0.55));
+        let rarityWeight = raritySellWeight[item.rarity] || 1.0;
+        let val = item.basePrice + Math.floor(Math.pow(level, 2.6) * 18 * (item.rarity * 0.55) * rarityWeight);
         const mults = [1.50, 1.72, 1.81, 1.95, 2.05, 2.33, 2.66, 3.10, 3.62, 4.66, 6.75];
-
         if (level >= 10) {
-            let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.6) * 18 * (item.rarity * 0.55));
+            let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.6) * 18 * (item.rarity * 0.55) * rarityWeight);
             val = valAt9;
             for (let i = 10; i <= level; i++) { val = Math.floor(val * mults[i - 10]); }
         }
         return val;
     }
 
-    // ⭐ 요청받은 새로운 강화 비용 공식 반영
     function getUpgradeCost(w) {
         if (w.level >= 9) return Math.floor(getBaseValue(w.id, w.level) * 0.10);
-        // 제작비 계수 0.22, 강화 증가 계수 10으로 하향
-        return Math.floor(ITEMS[w.id].gold * 0.22) + Math.floor(Math.pow(w.level, 1.9) * 10 * (ITEMS[w.id].rarity * 0.6));
+        const item = ITEMS[w.id];
+        const goldCoeff = rarityCostCoeff[item.rarity] || 0.22;
+        return Math.floor(item.gold * goldCoeff) + Math.floor(Math.pow(w.level, 1.9) * 10 * (item.rarity * 0.6));
     }
 
-    function getSellPrice(w) { 
-        return Math.floor(getBaseValue(w.id, w.level) * state.buffs.sellBonus); 
-    }
+    function getSellPrice(w) { return Math.floor(getBaseValue(w.id, w.level) * state.buffs.sellBonus); }
 
     function getMatchup(e, w) { 
         if(e === 'none' || w === 'none') return 0; 
@@ -473,33 +472,82 @@
         return Math.max(3, Math.floor(t));
     }
 
-    // --- 4. 저장 / 로드 ---
+    // --- 4. 저장 / 로드 / 초기화 ---
     function saveGame() { 
-        localStorage.setItem('blacksmith_master_vfinal_clean_save', JSON.stringify(state)); 
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state)); 
         const ind = document.getElementById('save-indicator'); 
         if(ind) { ind.style.opacity = 1; setTimeout(() => { ind.style.opacity = 0; }, 1000); } 
     }
     
     function loadGame() { 
-        let s = localStorage.getItem('blacksmith_master_vfinal_clean_save'); 
+        let s = localStorage.getItem(SAVE_KEY); 
         if(s) { 
             try { 
                 let p = JSON.parse(s); 
-                state = {...state, ...p}; 
+                // 안전한 깊은 병합
+                state.gold = p.gold ?? 1000;
+                state.artisanExp = p.artisanExp ?? 0;
+                state.artisanLevel = p.artisanLevel ?? 1;
+                state.blessings = p.blessings ?? 0;
+                state.tickets = p.tickets ?? 0;
+                state.anvil = p.anvil ?? null;
+                state.inventory = p.inventory || [];
+                state.quests = p.quests || [];
+                state.completedCollections = p.completedCollections || [];
+                state.nextQuestRefresh = p.nextQuestRefresh || 0;
+                state.unlockedWeapons = p.unlockedWeapons || ['검', '단검'];
+                
+                state.mats = { ...state.mats, ...(p.mats || {}) };
+                state.facilities = { ...state.facilities, ...(p.facilities || {}) };
+                state.buffs = { ...state.buffs, ...(p.buffs || {}) };
+                state.merc = { ...state.merc, ...(p.merc || {}) };
+                state.history = { ...state.history, ...(p.history || {}) };
+                state.freeCraft = { ...state.freeCraft, ...(p.freeCraft || {}) };
+
                 if(state.completedCollections) {
                     state.completedCollections.forEach(id => { let c = COLLECTIONS.find(x => x.id === id); if(c) c.done = true; }); 
                 }
+                
                 // 해금 안된 의뢰가 있다면 초기화
                 if(state.quests && state.quests.length > 0) {
                     let invalid = state.quests.some(q => { let it = ITEMS[q.targetId]; return !it || !state.unlockedWeapons.includes(it.type); });
                     if(invalid) generateQuests();
                 }
+
                 if(state.merc.isDispatching) resumeDispatch(); 
                 updateUI(); 
                 return true; 
             } catch(e) { return false; } 
         } 
         return false; 
+    }
+
+    function exportSave() {
+        try {
+            const saveString = btoa(encodeURIComponent(JSON.stringify(state)));
+            prompt("아래 코드를 복사해 두세요.", saveString);
+            addLog("[시스템] 세이브 코드를 추출했습니다.", "text-blue-300");
+        } catch(e) { alert("세이브 코드 생성 실패!"); }
+    }
+
+    function importSave() {
+        const inputStr = prompt("세이브 코드를 붙여넣으세요:");
+        if (!inputStr) return;
+        try {
+            const decodedState = JSON.parse(decodeURIComponent(atob(inputStr)));
+            if (decodedState && decodedState.gold !== undefined) {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(decodedState));
+                alert("세이브를 성공적으로 불러왔습니다!");
+                location.reload();
+            } else { alert("잘못된 세이브 형식입니다."); }
+        } catch(e) { alert("코드가 손상되었습니다."); }
+    }
+
+    function resetGame() { 
+        if(confirm("모든 데이터가 삭제됩니다. 초기화하시겠습니까?")) { 
+            localStorage.removeItem(SAVE_KEY); 
+            location.reload(); 
+        } 
     }
 
     // --- 5. 액션 로직 ---
@@ -528,7 +576,7 @@
                 addLog(`[해금] 🆕 <b>${r.type}</b> 해금! (첫 제작 50% 할인)`, "text-blue-400 font-black");
                 addLog(`💡 팁: ${r.tip}`, "text-blue-200");
                 state.freeCraft[r.type] = true; 
-                updateCraftFilter(); // 필터 즉시 갱신
+                updateCraftFilter();
             }
         });
     }
@@ -546,14 +594,13 @@
     }
 
     function craftWeapon(id) {
-        const item = ITEMS[id]; 
-        const isDiscount = !!state.freeCraft[item.type];
+        const item = ITEMS[id]; const isDiscount = !!state.freeCraft[item.type];
         const cCost = isDiscount ? Math.floor(item.gold * 0.5) : item.gold;
         if(state.gold < cCost) { addLog("[경고] 골드가 부족합니다.", "text-red-400"); return; }
         for(let [m, c] of Object.entries(item.mats)) if((state.mats[m]||0) < c) { addLog("[경고] 재료가 부족합니다.", "text-red-400"); return; }
-        if(state.anvil) { if(state.inventory.length >= 20 + (state.facilities.vault * 5)) { addLog("[경고] 보관함이 꽉 찼습니다.", "text-red-400"); return; } state.inventory.push({...state.anvil}); }
+        if(state.anvil) { if(state.inventory.length >= 20 + (state.facilities.vault * 5)) { addLog("[경고] 보관함이 꽉 차서 모루를 비울 수 없습니다.", "text-red-400"); return; } state.inventory.push({...state.anvil}); }
         state.gold -= cCost; for(let [m, c] of Object.entries(item.mats)) state.mats[m] -= c;
-        if(isDiscount) { state.freeCraft[item.type] = false; addLog(`[혜택] ${item.type} 첫 제작 할인 적용!`, "text-yellow-300"); }
+        if(isDiscount) { state.freeCraft[item.type] = false; addLog(`[제작] ${item.type} 첫 제작 할인 적용!`, "text-yellow-300"); }
         state.anvil = { id, level: 0, dur: item.maxDur + state.facilities.bellows, maxDur: item.maxDur + state.facilities.bellows, totalCost: cCost, failBonus: 0 };
         addLog(`[제작] ${item.name} 제작 완료.`); 
         updateUI();
@@ -563,94 +610,166 @@
         if(!state.anvil || state.anvil.level >= 20) return;
         let cost = getUpgradeCost(state.anvil);
         if(state.gold < cost) { addLog("[경고] 골드가 부족합니다.", "text-red-400"); return; }
+        
         let useBlessing = document.getElementById('use-blessing')?.checked && state.blessings > 0 && state.anvil.level >= 10;
         if (useBlessing) state.blessings--;
         state.gold -= cost; state.anvil.totalCost = (state.anvil.totalCost || 0) + cost;
+        
         let rate = BASE_RATES[state.anvil.level];
-        let bonus = Math.min(0.05, state.anvil.failBonus || 0);
+        let bonus = Math.min(0.05, state.anvil.failBonus || 0); // 5% 캡
         let artisanBonus = state.artisanLevel * 0.002;
         let sRate = Math.min(1.0, rate.s + state.buffs.successRate + (state.facilities.hammer * 0.01) + bonus + artisanBonus);
+        
+        // ⭐ 난수 1회 추출로 확률 판정 일원화
         let rand = Math.random();
+
         if (rand < sRate) {
-            state.anvil.level++; state.anvil.failBonus = 0;
+            state.anvil.level++; state.anvil.failBonus = 0; // 성공시 보너스 초기화
             if(state.anvil.level > state.history.maxUpgrade) { state.history.maxUpgrade = state.anvil.level; checkUnlocks(); }
             if ([7, 10, 15, 20].includes(state.anvil.level)) {
-                let durInc = (state.anvil.level === 20 ? 10 : (state.anvil.level === 15 ? 5 : (state.anvil.level === 10 ? 3 : 2)));
-                state.anvil.maxDur += durInc;
-                addLog(`[성장] ✨ 무기 돌파! 내구도 +${durInc}`, "text-cyan-400 font-bold");
+                let dInc = state.anvil.level === 20 ? 10 : (state.anvil.level === 15 ? 5 : (state.anvil.level === 10 ? 3 : 2));
+                state.anvil.maxDur += dInc;
+                addLog(`[강화] ✨ 무기 돌파! 내구도 +${dInc}`, "text-cyan-400 font-bold");
             }
-            state.anvil.dur = state.anvil.maxDur; addLog(`[강화] 챙!! +${state.anvil.level} 성공!`, "text-green-400 font-bold");
+            state.anvil.dur = state.anvil.maxDur;
+            addLog(`[강화] 챙!! +${state.anvil.level} 성공!`, "text-green-400 font-bold");
         } else if (rand < sRate + rate.m) {
+            // 실패시 0.5% 누적 (최대 5%까지)
             state.anvil.failBonus = Math.min(0.05, (state.anvil.failBonus || 0) + 0.005); 
-            addLog(`[유지] 깡... 실패. 다음 성공률 +0.5% 누적!`, "text-yellow-500");
+            addLog(`[유지] 깡... 실패. 다음 성공률 +0.5% 보정 누적!`, "text-yellow-500");
         } else {
-            if (useBlessing) { state.anvil.level = Math.max(0, state.anvil.level - 1); addLog("[축복] 🌸 파괴 방어! (단계 하락)", "text-pink-400"); }
-            else { 
-                addLog("[파괴] 콰창!!! 무기가 박살났습니다.", "text-red-500 font-black"); state.anvil = null; 
-                const b = document.getElementById('main-body'); if(b){ b.classList.add('shake-hard'); setTimeout(() => b.classList.remove('shake-hard'), 400); }
+            if (useBlessing) { 
+                state.anvil.level = Math.max(0, state.anvil.level - 1); 
+                addLog("[강화] 🌸 축복으로 파괴 방어! (단계 하락)", "text-pink-400"); 
+            } else { 
+                addLog("[파괴] 콰창!!! 무기가 박살났습니다.", "text-red-500 font-black"); 
+                state.anvil = null; 
+                const b = document.getElementById('main-body'); if(b){ b.classList.add('shake-hard'); setTimeout(() => b.classList.remove('shake-hard'), 400); } 
             }
         }
         updateUI();
     }
 
-    function storeFromAnvil() { if(!state.anvil) return; if(state.inventory.length >= 20 + (state.facilities.vault * 5)) { addLog("[경고] 보관함 가득 참.", "text-red-400"); return; } state.inventory.push({...state.anvil}); state.anvil = null; addLog("[이동] 보관함으로 이동 완료."); updateUI(); }
-    function equipToMercFromAnvil() { if(!state.anvil || state.merc.isDispatching) return; let t = state.merc.weapon; state.merc.weapon = state.anvil; state.anvil = t; addLog("[장착] 용병 무기 장착 완료."); updateUI(); }
-    function retrieveFromMercToAnvil() { if(!state.merc.weapon || state.merc.isDispatching) return; let t = state.anvil; state.anvil = state.merc.weapon; state.merc.weapon = t; addLog("[회수] 모루로 회수 완료."); updateUI(); }
-    function storeFromMerc() { if(!state.merc.weapon || state.merc.isDispatching) return; if(state.inventory.length >= 20 + (state.facilities.vault * 5)) return; state.inventory.push({...state.merc.weapon}); state.merc.weapon = null; updateUI(); }
-    function retrieveToAnvilFromInv(i) { let t = state.anvil; state.anvil = state.inventory[i]; if(t) state.inventory[i] = t; else state.inventory.splice(i, 1); updateUI(); }
-    function equipToMercFromInv(i) { if(state.merc.isDispatching) return; let t = state.merc.weapon; state.merc.weapon = state.inventory[i]; if(t) state.inventory[i] = t; else state.inventory.splice(i, 1); updateUI(); }
+    // 스왑 함수들
+    function storeFromAnvil() {
+        if(!state.anvil) return;
+        if(state.inventory.length >= 20 + (state.facilities.vault * 5)) { addLog("[경고] 보관함이 가득 찼습니다.", "text-red-400"); return; }
+        state.inventory.push({...state.anvil}); state.anvil = null; 
+        updateUI();
+    }
 
+    function equipToMercFromAnvil() {
+        if(!state.anvil) return;
+        if(state.merc.isDispatching) { addLog("[경고] 파견 중 장비 교체 불가.", "text-red-400"); return; }
+        let t = state.merc.weapon; state.merc.weapon = state.anvil; state.anvil = t; 
+        updateUI();
+    }
+
+    function retrieveFromMercToAnvil() {
+        if(!state.merc.weapon) return;
+        if(state.merc.isDispatching) { addLog("[경고] 파견 중 장비 회수 불가.", "text-red-400"); return; }
+        let t = state.anvil; state.anvil = state.merc.weapon; state.merc.weapon = t; 
+        updateUI();
+    }
+
+    function storeFromMerc() {
+        if(!state.merc.weapon) return;
+        if(state.merc.isDispatching) return;
+        if(state.inventory.length >= 20 + (state.facilities.vault * 5)) { addLog("[경고] 보관함 가득 참.", "text-red-400"); return; }
+        state.inventory.push({...state.merc.weapon}); state.merc.weapon = null; 
+        updateUI();
+    }
+
+    function retrieveToAnvilFromInv(i) {
+        let t = state.anvil; state.anvil = state.inventory[i];
+        if(t) state.inventory[i] = t; else state.inventory.splice(i, 1);
+        updateUI();
+    }
+
+    function equipToMercFromInv(i) {
+        if(state.merc.isDispatching) { addLog("[경고] 파견 중 장비 교체 불가.", "text-red-400"); return; }
+        let t = state.merc.weapon; state.merc.weapon = state.inventory[i];
+        if(t) state.inventory[i] = t; else state.inventory.splice(i, 1);
+        updateUI();
+    }
+
+    // 판매
     function sellWeapon(src) {
         let w = src === 'anvil' ? state.anvil : state.merc.weapon;
-        if(!w || (src === 'merc' && state.merc.isDispatching)) return;
-        let price = getSellPrice(w); state.gold += price; addArtisanExp(price);
+        if(!w) return;
+        if(src === 'merc' && state.merc.isDispatching) { addLog("[경고] 파견 중 판매 불가.", "text-red-400"); return; }
+        let price = getSellPrice(w);
+        state.gold += price; addArtisanExp(price);
+        addLog(`[상점] +${w.level} ${ITEMS[w.id].name} 판매. +${price.toLocaleString()}G`, "text-gray-300");
         if(src === 'anvil') state.anvil = null; else state.merc.weapon = null;
-        addLog(`[상점] 무기를 판매했습니다. +${price.toLocaleString()}G`, "text-gray-300");
         updateUI();
     }
 
     function sellFromInventory(i) {
-        let w = state.inventory[i]; if(!w) return;
-        let price = getSellPrice(w); state.gold += price; addArtisanExp(price);
-        state.inventory.splice(i, 1); addLog(`[상점] 무기를 판매했습니다. +${price.toLocaleString()}G`, "text-gray-300");
+        let w = state.inventory[i];
+        if(!w) return;
+        let price = getSellPrice(w);
+        state.gold += price; addArtisanExp(price);
+        addLog(`[상점] 보관함에서 +${w.level} ${ITEMS[w.id].name} 판매. +${price.toLocaleString()}G`, "text-gray-300");
+        state.inventory.splice(i, 1);
         updateUI();
     }
 
+    // 파견
     function dispatchMercenary() {
         if(!state.merc.weapon || state.merc.isDispatching) return;
         if(state.merc.weapon.dur <= 0) { addLog("[경고] 내구도가 부족합니다.", "text-red-400"); return; }
+        
         const wType = WEAPON_TYPES[ITEMS[state.merc.weapon.id].type];
-        if (wType.utility === '내구도 소모 50% 방어' && Math.random() < 0.5) addLog("[방패] 🛡️ 내구도 소모 방어!", "text-blue-300");
-        else state.merc.weapon.dur--;
+        if (wType.utility === '내구도 소모 50% 방어' && Math.random() < 0.5) { addLog("[파견] 🛡️ 내구도 소모 방어 성공!", "text-blue-300"); }
+        else { state.merc.weapon.dur--; }
+        
         state.merc.regionId = document.getElementById('region-select').value;
         state.merc.isDispatching = true;
         state.merc.maxTimer = calculateDispatchTime(state.merc.regionId, state.merc.weapon);
         state.merc.startTime = Date.now();
         state.merc.endTime = state.merc.startTime + (state.merc.maxTimer * 1000);
-        resumeDispatch(); updateUI();
+        
+        addLog(`[파견] ${REGIONS.find(r => r.id === state.merc.regionId)?.name || '탐색지'}로 출정합니다.`, "text-purple-300");
+        resumeDispatch(); 
+        updateUI();
     }
 
     function completeDispatch() {
         clearInterval(dispatchInterval); state.merc.isDispatching = false;
-        document.getElementById('merc-idle').classList.remove('hidden'); document.getElementById('merc-dispatching').classList.add('hidden');
+        document.getElementById('merc-idle').classList.remove('hidden'); 
+        document.getElementById('merc-dispatching').classList.add('hidden');
+        
         const region = REGIONS.find(r => r.id === state.merc.regionId);
+        if(!state.merc.weapon) { updateUI(); return; }
         const item = ITEMS[state.merc.weapon.id];
         const wType = WEAPON_TYPES[item.type];
+        
         let failChance = Math.max(0.01, region.failRate + (state.merc.weapon.level < region.recLevel ? (region.recLevel - state.merc.weapon.level) * 0.05 : 0));
-        if (Math.random() < failChance) addLog("[실패] 용병이 패배하여 후퇴했습니다.", "text-red-400"); 
-        else {
+        
+        if (Math.random() < failChance) { 
+            addLog(`[탐색완료] 용병이 ${region.name}에서 후퇴했습니다.`, "text-red-400"); 
+        } else {
             if(region.id === 'forest') { state.history.forestSuccess++; checkUnlocks(); }
-            let gsChance = 0.20 + (wType.utility === '대성공 확률 증가' ? 0.15 : 0);
-            let isGS = Math.random() < gsChance; if(isGS) { state.history.greatSuccess++; checkUnlocks(); }
-            let baseGold = Math.floor(getBaseValue(item.id, state.merc.weapon.level) * 0.05) + region.rewardG;
-            let gold = Math.floor(baseGold * wType.rewardMod * state.buffs.rewardBonus * (1 + (state.facilities.mercenary * 0.05)) * (isGS ? 1.5 : 1.0));
+            
+            let isGS = Math.random() < (0.20 + (wType.utility === '대성공 확률 증가' ? 0.15 : 0));
+            if(isGS) { state.history.greatSuccess++; checkUnlocks(); }
+
+            let rBonus = 0.045 + (item.rarity * 0.005);
+            let lBonus = state.merc.weapon.level >= 10 ? 1 + ((state.merc.weapon.level - 9) * 0.06) : 1;
+            let bGold = Math.floor(getBaseValue(item.id, state.merc.weapon.level) * rBonus * lBonus) + region.rewardG;
+            let gold = Math.floor(bGold * wType.rewardMod * state.buffs.rewardBonus * (1 + (state.facilities.mercenary * 0.05)) * (isGS ? 1.5 : 1.0));
             state.gold += gold;
+            
             let matCount = Math.round((Math.random() * 2 + 2) * wType.dropMod) + (wType.utility === '추가재료 확정+1' ? 1 : 0);
             state.mats[region.dropMat] += matCount;
+            
             let bChance = (region.id === 'heaven' ? 0.15 : (region.id === 'abyss' ? 0.05 : 0)) * (wType.utility === '축복 발견 2배' ? 2 : 1);
             let tChance = 0.05 * (wType.utility === '완료권 발견 증가' ? 2.5 : 1);
-            let extra = ''; if(Math.random() < bChance) { state.blessings++; extra += ' 🌸축복!'; } if(Math.random() < tChance) { state.tickets++; extra += ' ⏩완료권!'; }
-            addLog(`[탐색완료] +${gold.toLocaleString()}G, 재료 x${matCount}${extra}${isGS ? ' (대성공!)' : ''}`, "text-green-300");
+            let extra = '';
+            if(Math.random() < bChance) { state.blessings++; extra += ' 🌸축복 발견!'; }
+            if(Math.random() < tChance) { state.tickets++; extra += ' ⏩완료권 발견!'; }
+            addLog(`[탐색완료] ${region.name} 성공! +${gold.toLocaleString()}G 획득.${isGS ? ' (대성공!)' : ''}`, "text-green-300");
         }
         updateUI();
     }
@@ -661,61 +780,87 @@
         document.getElementById('merc-idle').classList.add('hidden');
         document.getElementById('merc-dispatching').classList.remove('hidden');
         document.getElementById('dispatch-region-text').innerText = region.name;
-        const match = getMatchup(ITEMS[state.merc.weapon.id].element, region.weakness);
+        
+        const item = ITEMS[state.merc.weapon.id];
+        const match = getMatchup(item.element, region.weakness);
         safeSetText('dispatch-weak-text', match === 1 ? '🔥 약점 적중! 시간 단축!' : (match === -1 ? '⚠️ 역속성! 시간 지연!' : ''));
+
         if(dispatchInterval) clearInterval(dispatchInterval);
         dispatchInterval = setInterval(() => {
             let rem = state.merc.endTime - Date.now();
-            if(rem <= 0) completeDispatch();
+            if(rem <= 0) { completeDispatch(); } 
             else {
                 safeSetText('dispatch-time-text', `남은 시간: ${Math.ceil(rem / 1000)}초`);
+                const prog = ((Date.now() - state.merc.startTime) / (state.merc.maxTimer * 1000)) * 100;
                 const bar = document.getElementById('dispatch-progress-bar');
-                if(bar) bar.style.width = `${((Date.now() - state.merc.startTime) / (state.merc.maxTimer * 1000)) * 100}%`;
-                document.getElementById('btn-instant-complete').classList.toggle('hidden', state.tickets <= 0);
+                if(bar) bar.style.width = `${Math.min(100, Math.max(0, prog))}%`;
             }
         }, 100);
+    }
+
+    // 아이템 및 부가기능
+    function useInstantTicket() { 
+        if(!state.merc.isDispatching || state.tickets <= 0) {
+            addLog("[경고] 완료권을 사용할 수 없습니다.", "text-red-400");
+            return; 
+        }
+        state.tickets--; 
+        state.merc.endTime = Date.now(); 
+        addLog("[아이템] ⏩ 즉시 완료권을 사용했습니다.", "text-indigo-300");
+        updateUI(); 
     }
 
     function repairMercWeapon() { 
         if(!state.merc.weapon || state.merc.isDispatching) return; 
         let mi = ITEMS[state.merc.weapon.id]; 
         let rep = Math.max(10, Math.floor(getBaseValue(mi.id, state.merc.weapon.level) * 0.01)); 
-        if(state.gold < rep || state.merc.weapon.maxDur <= 1 || state.merc.weapon.dur >= state.merc.weapon.maxDur) return; 
+        if(state.gold < rep) { addLog("[경고] 골드가 부족합니다.", "text-red-400"); return; }
+        if(state.merc.weapon.maxDur <= 1 || state.merc.weapon.dur >= state.merc.weapon.maxDur) return;
         state.gold -= rep; state.merc.weapon.maxDur--; state.merc.weapon.dur = state.merc.weapon.maxDur; 
-        addLog(`[수리] 수리 완료 (-${rep}G). 남은 수명: ${state.merc.weapon.maxDur}`); updateUI(); 
+        addLog(`[수리] 내구도 수리 완료 (-${rep}G). 남은 수명: ${state.merc.weapon.maxDur}`, "text-teal-400"); 
+        updateUI(); 
+    }
+
+    function buyBlessing() { 
+        if(state.gold < 10000000) { addLog("[경고] 골드가 부족합니다.", "text-red-400"); return; }
+        state.gold -= 10000000; state.blessings++; 
+        addLog("[구매] 🌸 여신의 축복 획득", "text-pink-400");
+        updateUI(); 
     }
 
     function generateQuests(man = false) {
-        if(man && state.nextQuestRefresh > Date.now()) return;
+        if(man && state.nextQuestRefresh > Date.now()) {
+            addLog("[경고] 아직 의뢰 갱신 쿨타임입니다.", "text-red-400");
+            return;
+        }
         state.nextQuestRefresh = Date.now() + 60000; state.quests = [];
-        // ⭐ 유저 최고 강화 비례 티어 제한 (뉴비 억까 방지)
         let maxRar = Math.min(8, 2 + Math.floor((state.history.maxUpgrade || 0) / 2));
-        const ids = Object.keys(ITEMS).filter(id => {
-            const item = ITEMS[id];
-            return state.unlockedWeapons.includes(item.type) && item.rarity <= maxRar;
-        });
+        const ids = Object.keys(ITEMS).filter(id => state.unlockedWeapons.includes(ITEMS[id].type) && ITEMS[id].rarity <= maxRar);
         for(let i=0; i<4; i++) {
             let rid = ids[Math.floor(Math.random() * ids.length)];
             let rlv = Math.floor(Math.random() * 6) + 3;
             state.quests.push({ targetId: rid, reqLevel: rlv, reward: Math.floor(getSellPrice({id: rid, level: rlv}) * 2.8) });
         }
+        if (man) addLog("[의뢰] 상인 길드에 새로운 의뢰를 요청했습니다.", "text-blue-300");
         updateUI();
     }
 
     function completeQuest(idx) {
         let q = state.quests[idx];
-        let canAnvil = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
-        let invIdx = state.inventory.findIndex(w => w.id === q.targetId && w.level >= q.reqLevel);
-        if (canAnvil) state.anvil = null; else if (invIdx !== -1) state.inventory.splice(invIdx, 1); else return;
+        if(!q) return;
+        let aOk = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
+        let iIdx = state.inventory.findIndex(w => w.id === q.targetId && w.level >= q.reqLevel);
+        if (aOk) state.anvil = null; else if (iIdx !== -1) state.inventory.splice(iIdx, 1); else return;
         state.gold += q.reward; state.quests.splice(idx, 1); state.history.questCompleted++; checkUnlocks(); 
         addLog(`[의뢰] 보상 수령 +${q.reward.toLocaleString()}G`, "text-green-400"); updateUI();
     }
 
     function buyFacility(id) {
-        const f = FACILITIES[id]; let c = f.getCost(state.facilities[id]);
-        if(state.gold < c.gold || (c.mat && state.mats[c.mat] < c.matCost)) return;
+        const f = FACILITIES[id]; if(!f) return;
+        let c = f.getCost(state.facilities[id]);
+        if(state.gold < c.gold || (c.mat && (state.mats[c.mat]||0) < c.matCost)) { addLog("[경고] 재화가 부족합니다.", "text-red-400"); return; }
         state.gold -= c.gold; if(c.mat) state.mats[c.mat] -= c.matCost; state.facilities[id]++; 
-        addLog(`[시설] ${f.name} 업그레이드!`, "text-yellow-300"); updateUI();
+        addLog(`[시설] ${f.name} 업그레이드 완료!`, "text-yellow-300"); updateUI();
     }
 
     function registerColl(id) {
@@ -727,10 +872,10 @@
         if(c.buff.type==='successRate') state.buffs.successRate+=c.buff.val;
         if(c.buff.type==='dispatchTime') state.buffs.dispatchTime*=c.buff.val;
         if(c.buff.type==='sellBonus') state.buffs.sellBonus*=c.buff.val;
-        addLog(`[도감] ${c.title} 달성!`, "text-yellow-400"); updateUI();
+        addLog(`[도감] ${c.title} 등록 완료!`, "text-yellow-400"); updateUI();
     }
 
-    // --- 6. UI 업데이트 및 렌더러 ---
+    // --- 6. 렌더러 루프 ---
     function updateTimers() {
         const btn = document.getElementById('btn-refresh-quest'); if(!btn) return;
         if (state.nextQuestRefresh && Date.now() < state.nextQuestRefresh) {
@@ -739,25 +884,14 @@
         } else { btn.innerText = `🔄 갱신 (1분)`; btn.disabled = false; }
     }
 
-    // ⭐ 제작 필터 동적 생성 (해금 무기만 노출)
     function updateCraftFilter() {
-        const filterEl = document.getElementById('craft-filter');
-        if (!filterEl) return;
+        const filterEl = document.getElementById('craft-filter'); if (!filterEl) return;
         const currentVal = filterEl.value;
         const icons = { '검': '🗡️', '단검': '🔪', '대검': '⚔️', '방패': '🛡️', '지팡이': '🪄', '활': '🏹', '너클': '👊', '낫': '🪓' };
-        const desc = {
-            '검': '표준', '단검': '속도 55% 단축, 재료 확정 +1', '대검': '골드 보상 30% 증가',
-            '방패': '내구도 소모 50% 확률 방어', '지팡이': '축복 발견 확률 2배', '활': '속도 25% 단축, 완료권 확률↑',
-            '너클': '속도 40% 단축, 대성공 35%', '낫': '골드 보상 85% 증가, 내구도 6'
-        };
+        const dsc = { '검': '표준', '단검': '속도 55%↑', '대검': '골드 30%↑', '방패': '내구도 방어', '지팡이': '축복 2배', '활': '속도 25%↑', '너클': '대성공 35%', '낫': '골드 85%↑' };
         let html = `<option value="all">🔍 모든 무기 보기</option>`;
-        state.unlockedWeapons.forEach(w => {
-            html += `<option value="${w}">${icons[w]} ${w} (${desc[w]})</option>`;
-        });
-        if (filterEl.innerHTML !== html) {
-            filterEl.innerHTML = html;
-            filterEl.value = state.unlockedWeapons.includes(currentVal) ? currentVal : 'all';
-        }
+        state.unlockedWeapons.forEach(w => { html += `<option value="${w}">${icons[w]} ${w} (${dsc[w]})</option>`; });
+        if (filterEl.innerHTML !== html) { filterEl.innerHTML = html; filterEl.value = state.unlockedWeapons.includes(currentVal) ? currentVal : 'all'; }
     }
 
     function updateUI() {
@@ -769,57 +903,112 @@
         const expBar = document.getElementById('ui-artisan-exp-bar');
         if(expBar) expBar.style.width = `${Math.min(100, (state.artisanExp / nExp) * 100)}%`;
 
+        // ⭐ 모루 영역 확실하게 갱신
         if (state.anvil) {
-            document.getElementById('anvil-empty').classList.add('hidden'); document.getElementById('anvil-active').classList.remove('hidden');
-            const item = ITEMS[state.anvil.id];
-            safeSetText('anvil-weapon-name', (state.anvil.level > 0 ? '+'+state.anvil.level : '') + ' ' + item.name);
-            document.getElementById('anvil-weapon-name').className = `text-3xl font-black truncate mb-1 ${getWeaponColor(state.anvil.level, item.rarity)}`;
-            safeSetText('anvil-weapon-type', item.type);
-            const eData = ELEM_DATA[item.element];
+            document.getElementById('anvil-empty').classList.add('hidden'); 
+            document.getElementById('anvil-active').classList.remove('hidden');
+            const it = ITEMS[state.anvil.id];
+            let roleText = it.rarity <= 2 ? " [판매형]" : (it.rarity <= 4 ? " [성장형]" : " [파견형]");
+            safeSetText('anvil-weapon-name', (state.anvil.level > 0 ? '+'+state.anvil.level : '') + ' ' + it.name + roleText);
+            document.getElementById('anvil-weapon-name').className = `text-3xl font-black truncate mb-1 ${getWeaponColor(state.anvil.level, it.rarity)}`;
+            
+            safeSetText('anvil-weapon-type', it.type);
+            const eData = ELEM_DATA[it.element];
             safeSetText('anvil-weapon-elem', eData.text);
-            document.getElementById('anvil-weapon-elem').className = `badge ${eData.class} px-3 py-1 text-sm`;
-            safeSetText('anvil-base-price', getSellPrice(state.anvil).toLocaleString());
-            safeSetText('anvil-total-cost', (state.anvil.totalCost || 0).toLocaleString());
-            let profit = getSellPrice(state.anvil) - (state.anvil.totalCost || 0);
-            safeSetText('anvil-profit', (profit >= 0 ? '+' : '') + profit.toLocaleString() + ' G');
-            document.getElementById('anvil-profit').className = `font-black text-sm tracking-wider ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            const elemBadge = document.getElementById('anvil-weapon-elem');
+            if (elemBadge) elemBadge.className = `badge ${eData.class} px-3 py-1 text-sm`;
+
+            let sP = getSellPrice(state.anvil); let tC = state.anvil.totalCost || 0; let prf = sP - tC;
+            safeSetText('anvil-base-price', sP.toLocaleString()); safeSetText('anvil-total-cost', tC.toLocaleString());
+            safeSetText('anvil-profit', (prf >= 0 ? '+' : '') + prf.toLocaleString() + ' G');
+            document.getElementById('anvil-profit').className = `font-black text-sm tracking-wider ${prf >= 0 ? 'text-green-400' : 'text-red-400'}`;
             safeSetText('anvil-durability', `${state.anvil.dur}/${state.anvil.maxDur}`);
-            const bonus = state.anvil.failBonus || 0;
-            const fUI = document.getElementById('fail-bonus-ui');
-            if(fUI) { fUI.innerText = `🔥 보정 +${(bonus*100).toFixed(1)}%`; fUI.classList.toggle('hidden', bonus === 0); }
-            const btnUp = document.getElementById('btn-upgrade');
-            if (state.anvil.level >= 20) { btnUp.disabled = true; safeSetText('upgrade-cost', "MAX"); safeSetText('upgrade-rate', ''); }
-            else {
-                let cost = getUpgradeCost(state.anvil); btnUp.disabled = state.gold < cost; safeSetText('upgrade-cost', cost.toLocaleString() + " G");
-                let s = Math.min(1.0, BASE_RATES[state.anvil.level].s + state.buffs.successRate + (state.facilities.hammer*0.01) + (state.artisanLevel*0.002) + bonus);
-                safeSetText('upgrade-rate', `성공 ${Math.round(s*100)}% | 파괴 ${Math.round(BASE_RATES[state.anvil.level].d*100)}%`);
-            }
-            let jpEl = document.getElementById('anvil-jackpot');
+            
+            const jpEl = document.getElementById('anvil-jackpot');
             if(jpEl) {
                 if (state.anvil.level >= 20) jpEl.innerHTML = "<span class='text-red-400 font-black animate-pulse'>[절대무기]</span>";
                 else if (state.anvil.level >= 15) jpEl.innerHTML = "<span class='text-orange-400 font-black animate-pulse'>[신화급 가치]</span>";
                 else if (state.anvil.level >= 10) jpEl.innerHTML = "<span class='text-purple-400 font-black'>[영웅급 가치]</span>";
                 else jpEl.innerHTML = "";
             }
+
+            const bonus = state.anvil.failBonus || 0;
+            const fUI = document.getElementById('fail-bonus-ui');
+            if(fUI) { fUI.innerText = `🔥 보정 +${(bonus*100).toFixed(1)}%`; fUI.classList.toggle('hidden', bonus === 0); }
+            
+            const btnUp = document.getElementById('btn-upgrade');
+            if (state.anvil.level >= 20) { btnUp.disabled = true; safeSetText('upgrade-cost', "MAX"); safeSetText('upgrade-rate', ""); }
+            else {
+                let cost = getUpgradeCost(state.anvil); btnUp.disabled = state.gold < cost; safeSetText('upgrade-cost', cost.toLocaleString() + " G");
+                let s = Math.min(1.0, BASE_RATES[state.anvil.level].s + state.buffs.successRate + (state.facilities.hammer*0.01) + (state.artisanLevel*0.002) + bonus);
+                safeSetText('upgrade-rate', `성공 ${Math.round(s*100)}% | 파괴 ${Math.round(BASE_RATES[state.anvil.level].d*100)}%`);
+            }
             document.getElementById('blessing-container').className = (state.anvil.level >= 10 && state.blessings > 0) ? 'flex items-center justify-center text-[11px] text-pink-300 mt-2 bg-pink-900/30 py-2 px-3 rounded-lg border border-pink-800/50 cursor-pointer hover:bg-pink-900/50 transition w-full max-w-[260px]' : 'hidden';
             safeSetText('ui-blessing-count', state.blessings);
-        } else { document.getElementById('anvil-empty').classList.remove('hidden'); document.getElementById('anvil-active').classList.add('hidden'); }
+        } else { 
+            document.getElementById('anvil-empty').classList.remove('hidden'); 
+            document.getElementById('anvil-active').classList.add('hidden'); 
+        }
+
+        // ⭐ 용병 영역 완전히 갱신 및 초기화
+        const bDisp = document.getElementById('btn-dispatch');
+        const iComp = document.getElementById('btn-instant-complete');
+        const repBtn = document.getElementById('btn-repair-merc');
+        const dBar = document.getElementById('merc-durability-bar');
 
         if(state.merc.weapon) {
             const mi = ITEMS[state.merc.weapon.id];
             safeSetText('merc-weapon-name', (state.merc.weapon.level > 0 ? '+'+state.merc.weapon.level : '') + ' ' + mi.name);
             document.getElementById('merc-weapon-name').className = `font-black text-2xl truncate ${getWeaponColor(state.merc.weapon.level, mi.rarity)}`;
             safeSetText('merc-durability-text', `${state.merc.weapon.dur} / ${state.merc.weapon.maxDur}`);
-            const dBar = document.getElementById('merc-durability-bar');
-            if(dBar) dBar.style.width = `${(state.merc.weapon.dur/state.merc.weapon.maxDur)*100}%`;
-            document.getElementById('btn-dispatch').disabled = state.merc.weapon.dur <= 0 || state.merc.isDispatching;
+            
+            let durPercent = state.merc.weapon.maxDur > 0 ? (state.merc.weapon.dur / state.merc.weapon.maxDur) * 100 : 0;
+            let barColor = durPercent > 50 ? 'bg-green-500' : (durPercent > 20 ? 'bg-yellow-500' : 'bg-red-500');
+            if(dBar) { dBar.style.width = `${Math.max(0, Math.min(100, durPercent))}%`; dBar.className = `h-full transition-all duration-300 relative rounded-full ${barColor}`; }
+            
+            if(bDisp) bDisp.disabled = state.merc.weapon.dur <= 0 || state.merc.isDispatching;
             safeSetText('ui-ticket-btn-count', state.tickets);
-            document.getElementById('btn-instant-complete').classList.toggle('hidden', !state.merc.isDispatching || state.tickets <= 0);
-            safeSetText('time-preview', `예상 시간: ${calculateDispatchTime(document.getElementById('region-select').value, state.merc.weapon)}초`);
-        } else { safeSetText('merc-weapon-name', "맨손 (장착 없음)"); document.getElementById('btn-dispatch').disabled = true; }
+            if(iComp) iComp.classList.toggle('hidden', !state.merc.isDispatching || state.tickets <= 0);
+            
+            if(repBtn) {
+                let repC = Math.max(10, Math.floor(getBaseValue(mi.id, state.merc.weapon.level) * 0.01));
+                if(state.merc.weapon.maxDur <= 1) { repBtn.disabled = true; repBtn.innerText = "💀 수리 불가"; repBtn.classList.remove('text-red-300'); }
+                else if(state.merc.weapon.dur >= state.merc.weapon.maxDur) { repBtn.disabled = true; repBtn.innerText = "🛠️ 최대 내구도"; repBtn.classList.remove('text-red-300'); }
+                else { 
+                    repBtn.disabled = state.merc.isDispatching || state.gold < repC; 
+                    repBtn.innerText = `🛠️ 수리 (-${repC.toLocaleString()}G)`; 
+                    if(state.gold < repC && !state.merc.isDispatching) repBtn.classList.add('text-red-300');
+                    else repBtn.classList.remove('text-red-300');
+                }
+            }
+            
+            let regId = document.getElementById('region-select')?.value || REGIONS[0].id;
+            let region = REGIONS.find(r=>r.id===regId);
+            let match = getMatchup(mi.element, region.weakness);
+            let time = calculateDispatchTime(regId, state.merc.weapon);
+            
+            let rBonus = 0.045 + (mi.rarity * 0.005);
+            let lBonus = state.merc.weapon.level >= 10 ? 1 + ((state.merc.weapon.level - 9) * 0.06) : 1;
+            let estG = Math.floor((Math.floor(getBaseValue(mi.id, state.merc.weapon.level) * rBonus * lBonus) + region.rewardG) * WEAPON_TYPES[mi.type].rewardMod * (1 + state.facilities.mercenary * 0.05));
+            let grade = estG > 100000 ? "[초고수익]" : (estG > 10000 ? "[고수익]" : "[보통]");
+            
+            safeSetText('time-preview', `예상 시간: ${time}초 | 수익: ${grade}${match===1?' 🔥약점':match===-1?' ⚠️역속성':''}`);
+            safeSetText('dispatch-time-btn', `${time}초`);
+        } else { 
+            safeSetText('merc-weapon-name', "맨손 (장착 없음)"); 
+            document.getElementById('merc-weapon-name').className = "font-black text-2xl text-gray-500 truncate";
+            safeSetText('merc-durability-text', "0 / 0");
+            if(dBar) { dBar.style.width = "0%"; dBar.className = "h-full transition-all duration-300 relative rounded-full bg-green-500"; }
+            if(bDisp) bDisp.disabled = true; 
+            if(repBtn) { repBtn.disabled = true; repBtn.innerText = "🛠️ 골드로 내구도 수리"; repBtn.classList.remove('text-red-300'); }
+            if(iComp) iComp.classList.add('hidden');
+            safeSetText('time-preview', "무기를 장착해주세요.");
+            safeSetText('dispatch-time-btn', "--");
+        }
 
         let mInv = 20 + (state.facilities.vault * 5);
         safeSetText('inv-count', state.inventory.length); safeSetText('inv-total', mInv); safeSetText('inv-max-count', mInv);
+
         updateCraftFilter(); renderInventory(); renderCraftList(); renderFacilities(); renderQuests(); renderCollections(); saveGame();
     }
 
@@ -827,10 +1016,11 @@
         const list = document.getElementById('inventory-list'); if(!list) return; list.innerHTML = '';
         if(state.inventory.length === 0) { list.innerHTML = `<div class="text-center text-gray-500 text-sm py-8 bg-gray-800/50 rounded-xl border border-gray-700">보관함이 비어있습니다.</div>`; return; }
         state.inventory.forEach((w, i) => {
-            const item = ITEMS[w.id];
+            const it = ITEMS[w.id];
+            let roleText = it.rarity <= 2 ? " [판매형]" : (it.rarity <= 4 ? " [성장형]" : " [파견형]");
             list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col gap-2">
-                <div class="${getWeaponColor(w.level, item.rarity)} font-bold">+${w.level} ${item.name}</div>
-                <div class="text-[10px] text-gray-400">내구도: ${w.dur}/${w.maxDur} | ${WEAPON_TYPES[item.type].utility}</div>
+                <div class="${getWeaponColor(w.level, it.rarity)} font-bold">+${w.level} ${it.name}${roleText}</div>
+                <div class="text-[10px] text-gray-400">내구도: ${w.dur}/${w.maxDur} | ${WEAPON_TYPES[it.type].utility}</div>
                 <div class="grid grid-cols-3 gap-2">
                     <button onclick="retrieveToAnvilFromInv(${i})" class="bg-gray-700 p-1.5 rounded text-xs font-bold">🔥 모루</button>
                     <button onclick="equipToMercFromInv(${i})" class="bg-purple-700 p-1.5 rounded text-xs font-bold">🏃 장착</button>
@@ -843,16 +1033,17 @@
     function renderCraftList() {
         const f = document.getElementById('craft-filter')?.value || 'all';
         const list = document.getElementById('craft-list'); if(!list) return; list.innerHTML = '';
-        Object.values(ITEMS).forEach(item => {
-            if(f !== 'all' && item.type !== f) return;
-            if(!state.unlockedWeapons.includes(item.type)) return;
-            const isFree = !!state.freeCraft[item.type];
-            let matStr = Object.entries(item.mats).map(([k,v])=>`${getMatInfo(k).icon}x${v}`).join(' ');
+        Object.values(ITEMS).forEach(it => {
+            if(f !== 'all' && it.type !== f) return;
+            if(!state.unlockedWeapons.includes(it.type)) return;
+            const isFree = !!state.freeCraft[it.type];
+            let matStr = Object.entries(it.mats).map(([k,v])=>`${getMatInfo(k).icon}x${v}`).join(' ');
+            let roleText = it.rarity <= 2 ? " [판매형]" : (it.rarity <= 4 ? " [성장형]" : " [파견형]");
             list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border border-gray-700 mb-2 ${isFree ? 'ring-2 ring-yellow-500 unlock-anim' : ''}">
-                <div class="${getWeaponColor(0, item.rarity)} font-bold flex justify-between items-center">${item.name} ${isFree ? '<span class="text-[9px] bg-yellow-600 text-white px-1.5 py-0.5 rounded shadow-md animate-pulse">첫제작 할인!</span>' : ''}</div>
-                <div class="text-[10px] text-gray-400 mb-1">[${WEAPON_TYPES[item.type].utility}]</div>
-                <div class="text-[11px] text-gray-400">${isFree ? Math.floor(item.gold*0.5).toLocaleString() : item.gold.toLocaleString()}G | ${matStr || '무료'}</div>
-                <button onclick="craftWeapon('${item.id}')" class="w-full bg-blue-600 hover:bg-blue-500 mt-2 py-1.5 rounded font-bold text-sm transition-colors">제작하기</button>
+                <div class="${getWeaponColor(0, it.rarity)} font-bold flex justify-between items-center">${it.name}${roleText} ${isFree ? '<span class="text-[9px] bg-yellow-600 text-white px-1.5 py-0.5 rounded shadow-md animate-pulse">첫제작 할인!</span>' : ''}</div>
+                <div class="text-[10px] text-gray-400 mb-1">[${WEAPON_TYPES[it.type].utility}]</div>
+                <div class="text-[11px] text-gray-400">${isFree ? Math.floor(it.gold*0.5).toLocaleString() : it.gold.toLocaleString()}G | ${matStr || '무료'}</div>
+                <button onclick="craftWeapon('${it.id}')" class="w-full bg-blue-600 hover:bg-blue-500 mt-2 py-1.5 rounded font-bold text-sm transition-colors">제작하기</button>
             </div>`;
         });
     }
@@ -872,11 +1063,12 @@
     function renderQuests() {
         const list = document.getElementById('quest-list'); if(!list) return; list.innerHTML = '';
         state.quests.forEach((q, i) => {
-            const item = ITEMS[q.targetId];
+            const it = ITEMS[q.targetId];
+            if(!it) return;
             let can = (state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel) || state.inventory.some(w => w.id === q.targetId && w.level >= q.reqLevel);
             list.innerHTML += `<div class="bg-gray-800 p-4 rounded-xl border ${can ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'border-gray-700'} mb-2 flex flex-col gap-2">
                 <div class="flex justify-between items-start">
-                    <div class="font-bold text-sm text-gray-200">+${q.reqLevel} ${item.name} 납품</div>
+                    <div class="font-bold text-sm text-gray-200">+${q.reqLevel} ${it.name} 납품</div>
                     <button onclick="goToCraft('${q.targetId}')" class="btn-press shrink-0 bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-700/50 transition">🛠️ 바로가기</button>
                 </div>
                 <div class="text-xs text-yellow-400">보상: ${q.reward.toLocaleString()}G</div>
@@ -900,17 +1092,41 @@
         });
     }
 
-    function openTab(n) { document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); const t = document.getElementById(`tab-${n}`); if(t) t.classList.add('active'); document.querySelectorAll('[id^="tab-btn-"]').forEach(b => b.classList.replace('bg-gray-800', 'text-gray-500')); const btn = document.getElementById(`tab-btn-${n}`); if(btn) btn.classList.replace('text-gray-500', 'bg-gray-800'); }
+    // --- 탭 연동 및 초기화 ---
+    function openTab(n) { 
+        document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); 
+        const t = document.getElementById(`tab-${n}`); 
+        if(t) t.classList.add('active'); 
+
+        ['inventory', 'craft', 'facility', 'quest', 'book'].forEach(name => {
+            const btn = document.getElementById(`tab-btn-${name}`);
+            if(!btn) return;
+            if (name === n) {
+                btn.classList.add('bg-gray-800', 'text-white', 'border-purple-500');
+                btn.classList.remove('text-gray-500', 'border-transparent');
+            } else {
+                btn.classList.remove('bg-gray-800', 'text-white', 'border-purple-500');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            }
+        });
+    }
+
     function openGuide() { document.getElementById('guide-modal').classList.remove('hidden'); document.getElementById('guide-modal').classList.add('flex'); }
     function closeGuide() { document.getElementById('guide-modal').classList.add('hidden'); document.getElementById('guide-modal').classList.remove('flex'); }
-    function resetGame() { if(confirm("초기화하시겠습니까?")) { localStorage.removeItem('blacksmith_master_vfinal_clean_save'); location.reload(); } }
 
     window.onload = () => {
         const sel = document.getElementById('region-select');
-        if(sel) { sel.innerHTML = ''; REGIONS.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.name}</option>`); }
+        if(sel) { 
+            sel.innerHTML = ''; 
+            REGIONS.forEach(r => {
+                let weakBadge = r.weakness === 'none' ? '' : ` (${ELEM_DATA[r.weakness].text.slice(0,2)})`;
+                sel.innerHTML += `<option value="${r.id}">${r.name}${weakBadge}</option>`; 
+            }); 
+        }
         if(!loadGame()) { generateQuests(); checkUnlocks(); }
         setInterval(() => { updateTimers(); }, 1000);
         updateUI();
+        openTab('inventory'); // 기본 탭 설정
     };
 </script>
 </body>
