@@ -241,13 +241,13 @@
                 <select id="craft-filter" onchange="renderCraftList()" class="w-full shrink-0 bg-black/60 border border-gray-600 rounded-lg p-3 text-sm text-white mb-3 font-bold outline-none focus:border-blue-500 shadow-inner">
                     <option value="all">🔍 모든 무기 보기</option>
                     <option value="검">🗡️ 검 (표준 밸런스)</option>
-                    <option value="단검">🔪 단검 (속도 40% 단축, 보상↓)</option>
-                    <option value="대검">⚔️ 대검 (보상 50% 증가, 속도↓)</option>
-                    <option value="방패">🛡️ 방패 (내구도 40, 튼튼함)</option>
-                    <option value="지팡이">🪄 지팡이 (재료 드랍률 50% 증가)</option>
-                    <option value="활">🏹 활 (속도 10% 단축, 드랍률 20%↑)</option>
-                    <option value="낫">🪓 낫 (보상 100% 폭증, 내구도 6)</option>
-                    <option value="너클">👊 너클 (속도 30% 단축)</option>
+                    <option value="단검">🔪 단검 (속도 50% 단축, 보상 반토막)</option>
+                    <option value="대검">⚔️ 대검 (보상 60% 증가, 속도 30% 지연)</option>
+                    <option value="방패">🛡️ 방패 (내구도 40, 초장기 방치형)</option>
+                    <option value="지팡이">🪄 지팡이 (재료 드랍률 50% 폭증)</option>
+                    <option value="활">🏹 활 (속도 15% 단축, 드랍률 20%↑)</option>
+                    <option value="낫">🪓 낫 (보상 120% 폭증, 내구도 5 극악)</option>
+                    <option value="너클">👊 너클 (내구도 25, 속도 25% 단축)</option>
                 </select>
                 <div id="craft-list" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar"></div>
             </div>
@@ -301,18 +301,18 @@
                 </div>
                 
                 <div>
-                    <h3 class="text-white font-bold text-base mb-1">2. 용병 파견과 상성 🏃‍♂️</h3>
+                    <h3 class="text-white font-bold text-base mb-1">2. 용병 파견과 대성공! 🏃‍♂️</h3>
                     <p>만든 무기를 용병에게 장착시켜 던전을 탐색하세요.</p>
                     <div class="bg-gray-900 p-2 rounded mt-1 text-[12px] font-bold text-blue-300 text-center border border-gray-700">
                         💧수 ➔ 🔥화 ➔ ❄️빙 ➔ ⚡뇌 ➔ 💧수<br>
                         <span class="text-purple-400">🔮암</span> ↔️ <span class="text-yellow-400">✨명</span> (서로 약점)
                     </div>
-                    <p class="mt-1">던전 약점을 찌르면 탐색 시간이 <span class="text-green-400 font-bold">50% 단축</span>되고, 역속성이면 <span class="text-red-400 font-bold">50% 늘어납니다.</span></p>
+                    <p class="mt-2">던전 약점을 찌르면 탐색 시간이 <span class="text-green-400 font-bold">50% 단축</span>됩니다. 파견 시 일정 확률로 <span class="text-yellow-400 font-bold">대성공</span>이 발생하여 훨씬 많은 골드와 재료를 얻을 수 있습니다!</p>
                 </div>
 
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">3. 무기 특성과 수명(내구도) ⚔️</h3>
-                    <p>무기마다 고유의 특성이 있습니다. (예: 🔪단검은 속도 단축, 🛡️방패는 내구도 보너스 등). <br><span class="text-red-400 font-bold">주의:</span> 용병이 무기를 수리할 때마다 <b>최대 내구도(수명)가 1씩 깎입니다.</b> 또한, 강화 수치가 높을수록 수리비도 비싸지므로 무기가 깨지기 전에 상인에게 납품하는 것이 핵심입니다!</p>
+                    <p>무기마다 고유의 특성이 있습니다. (예: 🔪단검은 속도 단축, 🛡️방패는 내구도 보너스 등). <br><span class="text-red-400 font-bold">주의:</span> 용병이 무기를 수리할 때마다 <b>최대 내구도(수명)가 1씩 깎입니다.</b> 또한, 강화 수치가 높을수록 수리비도 기하급수적으로 비싸지므로 무기가 깨지기 전에 상인에게 납품하는 것이 핵심입니다!</p>
                 </div>
 
                 <div>
@@ -326,16 +326,16 @@
     </div>
 
 <script>
-    // --- 1. 무기 밸런스 데이터 (초강력 특성 부여 및 내구도 대폭 상향) ---
+    // --- 1. 무기 밸런스 데이터 ---
     const WEAPON_TYPES = {
         '검': { baseDur: 15, timeMod: 1.0, rewardMod: 1.0, dropMod: 1.0 },
-        '단검': { baseDur: 10, timeMod: 0.6, rewardMod: 0.8, dropMod: 1.0 }, 
-        '대검': { baseDur: 18, timeMod: 1.3, rewardMod: 1.5, dropMod: 1.0 }, 
-        '방패': { baseDur: 40, timeMod: 1.5, rewardMod: 1.0, dropMod: 1.1 }, 
-        '지팡이':{ baseDur: 12, timeMod: 1.1, rewardMod: 0.9, dropMod: 1.5 }, 
-        '활': { baseDur: 14, timeMod: 0.9, rewardMod: 1.1, dropMod: 1.2 }, 
-        '낫': { baseDur: 6, timeMod: 1.0, rewardMod: 2.0, dropMod: 1.0 }, 
-        '너클': { baseDur: 11, timeMod: 0.7, rewardMod: 0.95, dropMod: 1.0 } 
+        '단검': { baseDur: 8, timeMod: 0.5, rewardMod: 0.5, dropMod: 1.0 }, 
+        '대검': { baseDur: 18, timeMod: 1.3, rewardMod: 1.6, dropMod: 1.0 }, 
+        '방패': { baseDur: 40, timeMod: 1.6, rewardMod: 1.0, dropMod: 1.1 }, 
+        '지팡이':{ baseDur: 10, timeMod: 1.1, rewardMod: 0.9, dropMod: 1.5 }, 
+        '활': { baseDur: 12, timeMod: 0.85, rewardMod: 1.0, dropMod: 1.2 }, 
+        '낫': { baseDur: 5, timeMod: 1.2, rewardMod: 2.2, dropMod: 0.8 }, 
+        '너클': { baseDur: 25, timeMod: 0.75, rewardMod: 0.8, dropMod: 0.9 } 
     };
 
     const ELEM_DATA = {
@@ -348,15 +348,16 @@
         'light': { text: '✨명속성', class: 'bg-elem-light', reqMat: 'light', namePrefix: ['성기사의 ', '신성한 '] }
     };
 
+    // 대성공 드랍률 증가에 따른 제작 재료 요구치 스케일링 상향
     const TIERS = [
         { elem: 'none', rarity: 1, gold: 100, mats: 0, basePrice: 50 },
-        { elem: 'none', rarity: 2, gold: 300, mats: 2, basePrice: 150 }, 
-        { elem: 'water', rarity: 3, gold: 800, mats: 4, basePrice: 500 },
-        { elem: 'fire', rarity: 4, gold: 1500, mats: 6, basePrice: 1000 },
-        { elem: 'ice', rarity: 5, gold: 3000, mats: 8, basePrice: 2000 },
-        { elem: 'lightn', rarity: 6, gold: 6000, mats: 10, basePrice: 4000 },
-        { elem: 'dark', rarity: 7, gold: 12000, mats: 15, basePrice: 8000 },
-        { elem: 'light', rarity: 8, gold: 25000, mats: 20, basePrice: 15000 }
+        { elem: 'none', rarity: 2, gold: 300, mats: 5, basePrice: 150 }, 
+        { elem: 'water', rarity: 3, gold: 800, mats: 10, basePrice: 500 },
+        { elem: 'fire', rarity: 4, gold: 1500, mats: 15, basePrice: 1000 },
+        { elem: 'ice', rarity: 5, gold: 3000, mats: 25, basePrice: 2000 },
+        { elem: 'lightn', rarity: 6, gold: 6000, mats: 35, basePrice: 4000 },
+        { elem: 'dark', rarity: 7, gold: 12000, mats: 50, basePrice: 8000 },
+        { elem: 'light', rarity: 8, gold: 25000, mats: 70, basePrice: 15000 }
     ];
 
     const ITEMS = {};
@@ -398,11 +399,12 @@
         { id: 'c6', targetId: '대검_t7', reqLevel: 15, title: '마검사의 영혼', desc: '강화 성공률 5% 추가 증가', buff: { type: 'successRate', val: 0.05 }, done: false },
     ];
 
+    // 대성공 드랍률 증가에 따른 시설 필요 재료량 상향
     const FACILITIES = {
-        'hammer': { id: 'hammer', name: '미스릴 망치', icon: '🔨', desc: '기본 강화 성공률 +1%', max: 5, getCost: (lv) => ({ gold: 50000 * (lv+1), mat: 'iron', matName: '🪨철광석', matCost: 30 * (lv+1) }) },
-        'bellows': { id: 'bellows', name: '고블린 풀무', icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 3, getCost: (lv) => ({ gold: 100000 * (lv+1), mat: 'fire', matName: '🔥화염석', matCost: 15 * (lv+1) }) },
-        'vault': { id: 'vault', name: '비밀 금고', icon: '🧰', desc: '보관함 최대 칸수 +5칸', max: 4, getCost: (lv) => ({ gold: 150000 * (lv+1), mat: 'water', matName: '💧심해수', matCost: 15 * (lv+1) }) },
-        'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -5%, 보상 +10%', max: 5, getCost: (lv) => ({ gold: 200000 * (lv+1), mat: 'dark', matName: '🔮심연의혼', matCost: 10 * (lv+1) }) }
+        'hammer': { id: 'hammer', name: '미스릴 망치', icon: '🔨', desc: '기본 강화 성공률 +1%', max: 5, getCost: (lv) => ({ gold: 50000 * (lv+1), mat: 'iron', matName: '🪨철광석', matCost: 80 * (lv+1) }) },
+        'bellows': { id: 'bellows', name: '고블린 풀무', icon: '🔥', desc: '신규 무기 최대 내구도 +1', max: 3, getCost: (lv) => ({ gold: 100000 * (lv+1), mat: 'fire', matName: '🔥화염석', matCost: 40 * (lv+1) }) },
+        'vault': { id: 'vault', name: '비밀 금고', icon: '🧰', desc: '보관함 최대 칸수 +5칸', max: 4, getCost: (lv) => ({ gold: 150000 * (lv+1), mat: 'water', matName: '💧심해수', matCost: 40 * (lv+1) }) },
+        'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -5%, 보상 +10%', max: 5, getCost: (lv) => ({ gold: 200000 * (lv+1), mat: 'dark', matName: '🔮심연의혼', matCost: 25 * (lv+1) }) }
     };
 
     const BASE_RATES = [
@@ -420,7 +422,7 @@
         gold: 1000,
         mats: { iron: 0, water: 0, fire: 0, ice: 0, lightn: 0, dark: 0, light: 0 },
         blessings: 0,
-        tickets: 0, // 즉시 완료권
+        tickets: 0, 
         facilities: { hammer: 0, bellows: 0, vault: 0, mercenary: 0 },
         buffs: { successRate: 0, destroyReduce: 0, dispatchTime: 1.0, sellBonus: 1.0, rewardBonus: 1.0 },
         anvil: null, 
@@ -601,7 +603,6 @@
         });
     }
 
-    // 의뢰, 도감에서 숏컷(바로가기) 용도
     function goToCraft(itemId) {
         const item = ITEMS[itemId];
         if(item) {
@@ -709,8 +710,7 @@
             
             document.getElementById('btn-dispatch').disabled = state.merc.weapon.dur <= 0 || state.merc.isDispatching;
             
-            // 수리비 동적 렌더링 (레벨 비례 스케일링 적용)
-            let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 1.8) * 15 * item.rarity);
+            let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 2.2) * 20 * item.rarity);
             if (wMaxDur <= 1) {
                 btnRepair.innerText = `💀 수리 불가 (수명 다함)`;
                 btnRepair.disabled = true;
@@ -752,7 +752,6 @@
             document.getElementById('dispatch-time-btn').innerText = `--`;
         }
         
-        // 즉시 완료권 버튼 UI 업데이트
         if (state.merc.isDispatching) {
             document.getElementById('btn-instant-complete').classList.remove('hidden');
             document.getElementById('ui-ticket-btn-count').innerText = state.tickets;
@@ -775,7 +774,6 @@
         saveGame();
     }
 
-    // 1초마다 실행되어 타이머(의뢰 갱신 쿨타임 등)를 업데이트하는 UI 전용 함수
     function updateTimers() {
         const btn = document.getElementById('btn-refresh-quest');
         if(btn) {
@@ -862,7 +860,6 @@
             }
             if(!matStr) matStr = '필요 재료 없음';
             
-            // 모루가 비어있거나, 보관함에 남은 공간이 있으면 제작 가능하도록 변경
             let canCraft = canCraftMat && state.gold >= item.gold && (state.anvil === null || state.inventory.length < maxInv);
             let eData = ELEM_DATA[item.element];
 
@@ -913,7 +910,6 @@
         state.quests.forEach((q, idx) => {
             const item = ITEMS[q.targetId];
             
-            // 모루 및 보관함 양쪽 다 체크
             let validAnvil = state.anvil && state.anvil.id === q.targetId && state.anvil.level >= q.reqLevel;
             let validInvIndex = state.inventory.findIndex(w => w.id === q.targetId && w.level >= q.reqLevel);
             let canComplete = validAnvil || validInvIndex !== -1;
@@ -946,7 +942,6 @@
         const list = document.getElementById('collection-list');
         list.innerHTML = '';
         COLLECTIONS.forEach(c => {
-            // 모루 및 보관함 양쪽 다 체크
             let validAnvil = state.anvil && state.anvil.id === c.targetId && state.anvil.level >= c.reqLevel;
             let validInvIndex = state.inventory.findIndex(w => w.id === c.targetId && w.level >= c.reqLevel);
             let canReg = !c.done && (validAnvil || validInvIndex !== -1);
@@ -997,7 +992,6 @@
         if(state.gold < item.gold) return;
         for(let [m, count] of Object.entries(item.mats)) { if(state.mats[m] < count) return; }
         
-        // 스마트 제작 기능 (모루에 무언가 있다면 템을 보관함으로 자동 이동)
         if(state.anvil) { 
             let maxInv = 20 + (state.facilities.vault * 5);
             if(state.inventory.length >= maxInv) {
@@ -1061,7 +1055,6 @@
         updateUI();
     }
 
-    // --- 자유 스왑(Swap) 로직 통합 ---
     function storeFromAnvil() {
         if(!state.anvil) return;
         let maxInv = 20 + (state.facilities.vault * 5);
@@ -1147,11 +1140,11 @@
         if(wMaxDur <= 1) { addLog("[경고] 무기의 수명이 다하여 더 이상 수리할 수 없습니다.", "text-red-400"); return; }
         if(state.merc.weapon.dur >= wMaxDur) return;
         
-        let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 1.8) * 15 * item.rarity);
+        let repairCost = Math.floor(item.basePrice * 0.2) + Math.floor(Math.pow(state.merc.weapon.level, 2.2) * 20 * item.rarity);
         if(state.gold < repairCost) { addLog("[경고] 수리할 골드가 부족합니다.", "text-red-400"); return; }
         
         state.gold -= repairCost;
-        state.merc.weapon.maxDur = wMaxDur - 1; // 무기 수명 감소
+        state.merc.weapon.maxDur = wMaxDur - 1; 
         state.merc.weapon.dur = state.merc.weapon.maxDur;
         state.merc.weapon.totalCost = (state.merc.weapon.totalCost || 0) + repairCost;
         
@@ -1195,16 +1188,14 @@
         updateUI();
     }
 
-    // --- 즉시 완료권 사용 함수 ---
     function useInstantTicket() {
         if (!state.merc.isDispatching || state.tickets <= 0) return;
         state.tickets--;
-        state.merc.endTime = Date.now(); // 목표 시간을 현재로 당겨서 즉시 완료 처리
+        state.merc.endTime = Date.now(); 
         addLog(`[아이템 사용] ⏩ 즉시 완료권을 사용하여 탐색을 즉시 마쳤습니다!`, 'text-indigo-400 font-bold');
         updateUI();
     }
 
-    // --- 6. 오프라인 호환 파견 로직 ---
     function dispatchMercenary() {
         if(!state.merc.weapon || state.merc.weapon.dur <= 0 || state.merc.isDispatching) return;
         
@@ -1288,23 +1279,39 @@
         if (Math.random() < failChance) {
             addLog(`[토벌 실패] 용병이 몬스터에게 패배하여 도망쳤습니다.`, 'text-red-500 font-bold');
         } else {
+            // 대성공 여부 판별 (기본 20% + 레벨 격차 비례)
+            let greatSuccessChance = 0.20;
+            if (w.level > region.recLevel) greatSuccessChance += (w.level - region.recLevel) * 0.02;
+            let isGreatSuccess = Math.random() < greatSuccessChance;
+
             let mercRewardBonus = 1 + (state.facilities.mercenary * 0.1);
             let goldReward = region.rewardG + Math.floor(Math.pow(w.level, 1.6) * 30);
             goldReward = Math.floor(goldReward * WEAPON_TYPES[item.type].rewardMod * state.buffs.rewardBonus * mercRewardBonus);
             
+            // 대성공 골드 1.5배 뻥튀기
+            if (isGreatSuccess) {
+                goldReward = Math.floor(goldReward * 1.5);
+            }
+
             state.gold += goldReward;
             
             let dropMsg = '';
-            let actualDropRate = region.dropRate * WEAPON_TYPES[item.type].dropMod;
             
-            if (region.dropMat && Math.random() < actualDropRate) {
-                state.mats[region.dropMat]++;
+            if (region.dropMat) {
+                // 재료 드랍 개수 로직: 성공 시 2~3개, 대성공 시 4~6개 확정
+                let matCount = isGreatSuccess ? (Math.floor(Math.random() * 3) + 4) : (Math.floor(Math.random() * 2) + 2);
+                
+                // 무기군 특성(지팡이 등) 드랍 배율을 개수에 직접 적용
+                matCount = Math.max(1, Math.round(matCount * WEAPON_TYPES[item.type].dropMod));
+
+                state.mats[region.dropMat] += matCount;
                 let mName = region.dropMat==='iron'?'🪨철광석':region.dropMat==='water'?'💧심해수':region.dropMat==='fire'?'🔥화염석':region.dropMat==='ice'?'❄️만년설':region.dropMat==='lightn'?'⚡번개조각':region.dropMat==='dark'?'🔮심연의혼':'✨빛의결정';
-                dropMsg = ` 및 <span class="text-white bg-white/20 px-1 rounded">${mName}</span> 획득!`;
+                dropMsg = ` 및 <span class="text-white bg-white/20 px-1.5 py-0.5 rounded shadow-sm">${mName} x${matCount}</span> 획득!`;
             }
             
-            // 즉시 완료권 드랍 로직 (난이도 비례 확률 증가)
-            let ticketChance = 0.03 + (regionIndex * 0.02); // 3% ~ 15%
+            // 즉시 완료권 드랍 로직 (대성공 시 확률 2배)
+            let ticketChance = 0.03 + (regionIndex * 0.02);
+            if (isGreatSuccess) ticketChance *= 2; 
             if (Math.random() < ticketChance) {
                 state.tickets = (state.tickets || 0) + 1;
                 dropMsg += ` <br><span class="text-indigo-300 font-bold bg-indigo-900/40 px-2 py-0.5 rounded shadow-sm inline-block mt-1">⏩ 전리품: [즉시 완료권] 발견!</span>`;
@@ -1312,13 +1319,18 @@
 
             if (region.id === 'abyss' || region.id === 'heaven') {
                 let blessingChance = region.id === 'heaven' ? 0.15 : 0.05;
+                if (isGreatSuccess) blessingChance *= 1.5;
                 if (Math.random() < blessingChance) {
                     state.blessings++;
                     dropMsg += ` <br><span class="text-pink-400 font-bold bg-pink-900/40 px-2 py-0.5 rounded shadow-sm inline-block mt-1">🌸 극히 희귀한 전리품: [여신의 축복] 발견!</span>`;
                 }
             }
             
-            addLog(`[토벌 성공] <span class="text-yellow-400 font-bold">${goldReward.toLocaleString()}G</span>${dropMsg}`, 'text-green-300');
+            if (isGreatSuccess) {
+                addLog(`[대성공!] 던전을 완벽히 털었습니다! <span class="text-yellow-400 font-black">${goldReward.toLocaleString()}G</span>${dropMsg}`, 'text-yellow-300 text-[14px] font-bold');
+            } else {
+                addLog(`[토벌 성공] <span class="text-yellow-400 font-bold">${goldReward.toLocaleString()}G</span>${dropMsg}`, 'text-green-300');
+            }
         }
         updateUI();
     }
@@ -1329,7 +1341,6 @@
                 addLog("[경고] 아직 상인 길드에 의뢰를 요청할 수 없습니다.", "text-red-400");
                 return;
             }
-            // 3분 (180초) 쿨타임 설정
             state.nextQuestRefresh = Date.now() + (3 * 60 * 1000);
             addLog("[의뢰] 상인 길드에 새로운 의뢰 목록을 요청했습니다.", "text-blue-300 font-bold");
         }
@@ -1345,7 +1356,7 @@
             state.quests.push({ id: `q${i}`, targetId: rId, reqLevel: rLev, reward: reward });
         }
         updateUI();
-        updateTimers(); // 즉시 타이머 반영
+        updateTimers(); 
     }
 
     function completeQuest(idx) {
@@ -1396,7 +1407,6 @@
         
         addLog(`[도감] <span class="text-yellow-400 font-bold">'${c.title}'</span> 달성! 영구 패시브 획득.`, 'text-yellow-200 text-lg');
         
-        // 유저가 확실하게 체감할 수 있도록 축하 팝업(alert) 추가
         setTimeout(() => {
             alert(`🎉 도감 '${c.title}' 등록 완료!\n영구 효과: ${c.desc} 획득`);
         }, 100);
@@ -1404,20 +1414,17 @@
         updateUI();
     }
 
-    // --- 7. 초기화 ---
     window.onload = () => {
         renderRegionSelect();
         let hasSave = loadGame();
         if (!hasSave || state.quests.length === 0) generateQuests(); 
         updateUI(); 
         
-        // 전역 UI 타이머 (1초마다 실행)
         setInterval(updateTimers, 1000);
         updateTimers();
 
         if (!hasSave) {
             addLog("궁극의 대장간에 오신 것을 환영합니다. 전설을 써내려가세요.", "text-yellow-500 font-bold");
-            // 첫 시작 시 가이드 자동으로 띄워주기
             setTimeout(openGuide, 500);
         }
     };
