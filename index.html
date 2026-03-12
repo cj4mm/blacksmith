@@ -299,9 +299,9 @@
             
             <div class="space-y-5 text-[14px] text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
                 <div>
-                    <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 🔨</h3>
-                    <p>재료를 모아 무기를 만들고 모루에서 강화하세요. <span class="text-red-400 font-bold">+10강부터는 파괴 확률이 존재</span>하며, '🌸여신의 축복'을 체크하여 파괴를 1회 막을 수 있습니다 (단계만 1 하락).</p>
-                    <p class="mt-1 text-yellow-300 font-bold">💡 [팁] +7강, +10강, +15강 도달 시 상점 판매가가 엄청난 배율로 폭등하며, 최대 내구도(수명)도 영구 증가합니다!</p>
+                    <h3 class="text-white font-bold text-base mb-1">1. 무기 제작과 강화 (EV 1.01 잭팟 설계) 🔨</h3>
+                    <p>재료를 모아 무기를 만들고 강화하세요. <span class="text-red-400 font-bold">+5강부터 즉시 파괴 확률이 존재</span>하며, +9강 이후부터는 강화 비용이 <span class="text-yellow-300">현재 무기 가치의 10%</span>로 폭등합니다.</p>
+                    <p class="mt-1 font-bold text-teal-300">💡 [잭팟 팁] 1~9강 구간은 상점에 팔면 무조건 적자입니다! 상인 길드 의뢰(3배)를 통해서만 이득을 볼 수 있으며, 실패 확률을 뚫고 +10강 이상 진입 시 판매가가 기하급수적으로 폭등합니다!</p>
                 </div>
                 
                 <div>
@@ -316,7 +316,7 @@
 
                 <div>
                     <h3 class="text-white font-bold text-base mb-1">3. 무기 특성과 수명(내구도) ⚔️</h3>
-                    <p>무기마다 고유의 특성이 있습니다. (예: 🔪단검은 속도 단축, 🛡️방패는 내구도 보너스 등). <br><span class="text-red-400 font-bold">주의:</span> 용병이 무기를 수리할 때마다 <b>최대 내구도(수명)가 1씩 깎입니다.</b> 또한, 강화 수치가 높을수록 수리비도 기하급수적으로 비싸지므로 무기가 깨지기 전에 상인에게 납품하는 것이 핵심입니다!</p>
+                    <p>무기마다 고유의 특성이 있습니다. (예: 🔪단검은 속도 단축, 🛡️방패는 내구도 보너스 등). <br><span class="text-red-400 font-bold">주의:</span> 용병이 무기를 수리할 때마다 <b>최대 내구도(수명)가 1씩 깎입니다.</b> 또한, 잭팟 배율이 터진 고강화 무기는 수리비도 비싸지므로 적당한 시점에 상인에게 납품하는 것이 핵심입니다!</p>
                 </div>
 
                 <div>
@@ -409,30 +409,28 @@
         'mercenary': { id: 'mercenary', name: '정예 용병단 계약', icon: '🤝', desc: '파견 시간 -5%, 보상 +10%', max: 5, getCost: (lv) => ({ gold: 200000 * (lv+1), mat: 'dark', matName: '🔮심연의혼', matCost: 25 * (lv+1) }) }
     };
 
-    // 강화 확률 패치 (지옥구간 완화, 신화구간 소폭 상향)
+    // 🎰 '1% 잭팟' 공식 적용: 유저가 제시한 완벽한 확률 배분
     const BASE_RATES = [
         { s: 1.00, m: 0.00, d: 0.00 }, // 0->1
         { s: 0.90, m: 0.10, d: 0.00 }, // 1->2
-        { s: 0.90, m: 0.10, d: 0.00 }, // 2->3
-        { s: 0.80, m: 0.20, d: 0.00 }, // 3->4
-        { s: 0.80, m: 0.20, d: 0.00 }, // 4->5
-        { s: 0.70, m: 0.30, d: 0.00 }, // 5->6
-        { s: 0.60, m: 0.40, d: 0.00 }, // 6->7
-        { s: 0.50, m: 0.45, d: 0.05 }, // 7->8
-        { s: 0.45, m: 0.50, d: 0.05 }, // 8->9
-        { s: 0.40, m: 0.55, d: 0.05 }, // 9->10
-        // --- 지옥 구간 ---
-        { s: 0.40, m: 0.53, d: 0.07 }, // 10->11 (파괴율 10% -> 7% 하향)
-        { s: 0.38, m: 0.55, d: 0.07 }, // 11->12 
-        { s: 0.35, m: 0.58, d: 0.07 }, // 12->13
-        { s: 0.32, m: 0.61, d: 0.07 }, // 13->14
-        { s: 0.28, m: 0.65, d: 0.07 }, // 14->15
-        // --- 신화 구간 ---
-        { s: 0.15, m: 0.75, d: 0.10 }, // 15->16 (성공률 12% -> 15% 상향)
-        { s: 0.12, m: 0.78, d: 0.10 }, // 16->17 (성공률 10% -> 12% 상향)
-        { s: 0.10, m: 0.80, d: 0.10 }, // 17->18 (성공률 8% -> 10% 상향)
-        { s: 0.08, m: 0.82, d: 0.10 }, // 18->19 (성공률 6% -> 8% 상향)
-        { s: 0.05, m: 0.83, d: 0.12 }  // 19->20 (성공률 4% -> 5% 상향)
+        { s: 0.85, m: 0.15, d: 0.00 }, // 2->3
+        { s: 0.70, m: 0.30, d: 0.00 }, // 3->4 
+        { s: 0.55, m: 0.45, d: 0.00 }, // 4->5 (안전구간 끝)
+        { s: 0.45, m: 0.50, d: 0.05 }, // 5->6 (파괴 시작)
+        { s: 0.40, m: 0.55, d: 0.05 }, // 6->7
+        { s: 0.35, m: 0.60, d: 0.05 }, // 7->8
+        { s: 0.32, m: 0.62, d: 0.06 }, // 8->9
+        { s: 0.30, m: 0.63, d: 0.07 }, // 9->10 (제시된 확률 적용)
+        { s: 0.25, m: 0.65, d: 0.10 }, // 10->11 (하락 없이 파괴+유지만)
+        { s: 0.22, m: 0.68, d: 0.10 }, // 11->12
+        { s: 0.20, m: 0.69, d: 0.11 }, // 12->13
+        { s: 0.18, m: 0.71, d: 0.11 }, // 13->14
+        { s: 0.15, m: 0.73, d: 0.12 }, // 14->15
+        { s: 0.12, m: 0.76, d: 0.12 }, // 15->16
+        { s: 0.10, m: 0.77, d: 0.13 }, // 16->17 
+        { s: 0.08, m: 0.79, d: 0.13 }, // 17->18 
+        { s: 0.06, m: 0.80, d: 0.14 }, // 18->19
+        { s: 0.04, m: 0.81, d: 0.15 }  // 19->20
     ];
 
     let state = {
@@ -542,24 +540,51 @@
         return rarity >= 7 ? 'text-yellow-400' : (rarity >= 5 ? 'text-purple-400' : 'text-gray-200');
     }
 
-    function getUpgradeCost(weapon) {
-        const item = ITEMS[weapon.id];
-        return Math.floor(item.gold * 0.3) + Math.floor(Math.pow(weapon.level, 1.9) * 12 * (item.rarity * 0.6));
+    // 💸 동적 가치(Base Value) 산출 로직: EV 1.01 잭팟 모델 + 초반 구간 거품 제거
+    function getBaseValue(weaponId, level) {
+        const item = ITEMS[weaponId];
+        // 0~9강 구간: 상점 판매는 적자, 의뢰(3배)를 해야 겨우 이득을 보는 2.3제곱으로 거품 제거
+        let val = item.basePrice + Math.floor(Math.pow(level, 2.3) * 15 * (item.rarity * 0.5));
+        
+        // 10강 이상부터는 1% 이득 공식을 역산한 누적 배율 적용
+        const evMultipliers = [
+            1.60, // 10강
+            1.84, // 11강
+            1.95, // 12강
+            2.10, // 13강
+            2.22, // 14강
+            2.54, // 15강
+            2.92, // 16강
+            3.41, // 17강
+            4.01, // 18강
+            5.18, // 19강
+            7.52  // 20강
+        ];
+        
+        if (level >= 10) {
+            // 9강의 가치를 기준으로 곱연산 시작
+            let valAt9 = item.basePrice + Math.floor(Math.pow(9, 2.3) * 15 * (item.rarity * 0.5));
+            val = valAt9;
+            for (let i = 10; i <= level; i++) {
+                val = Math.floor(val * evMultipliers[i - 10]);
+            }
+        }
+        return val;
     }
 
-    // 잭팟 시스템 적용된 판매가 로직
-    function getSellPrice(weapon) {
-        const item = ITEMS[weapon.id];
-        let price = item.basePrice + Math.floor(Math.pow(weapon.level, 2.6) * 15 * (item.rarity * 0.5));
-        
-        // 💰 도파민 패치: 고강화 잭팟 배율 적용
-        let milestoneMultiplier = 1.0;
-        if (weapon.level >= 20) milestoneMultiplier = 10.0;
-        else if (weapon.level >= 15) milestoneMultiplier = 4.0;
-        else if (weapon.level >= 10) milestoneMultiplier = 2.0;
-        else if (weapon.level >= 7) milestoneMultiplier = 1.2;
+    // 💰 강화 비용: 9강 이상부터는 "현재 무기 가치의 정확히 10%"
+    function getUpgradeCost(weapon) {
+        if (weapon.level >= 9) {
+            return Math.floor(getBaseValue(weapon.id, weapon.level) * 0.10);
+        } else {
+            const item = ITEMS[weapon.id];
+            return Math.floor(item.gold * 0.3) + Math.floor(Math.pow(weapon.level, 1.9) * 12 * (item.rarity * 0.6));
+        }
+    }
 
-        price = Math.floor(price * milestoneMultiplier);
+    // 💰 최종 판매가 (도감 및 시설 보너스 합산)
+    function getSellPrice(weapon) {
+        let price = getBaseValue(weapon.id, weapon.level);
         return Math.floor(price * state.buffs.sellBonus);
     }
 
@@ -669,12 +694,11 @@
             let totalCost = state.anvil.totalCost || 0;
             let profit = sellPrice - totalCost;
 
-            // 잭팟 텍스트 표시 연동
+            // 잭팟 텍스트 표시 연동 (EV 모델)
             let milestoneText = "";
-            if (state.anvil.level >= 20) milestoneText = " <span class='text-red-500 text-xs font-black animate-pulse'>[x10 잭팟]</span>";
-            else if (state.anvil.level >= 15) milestoneText = " <span class='text-orange-500 text-xs font-black animate-pulse'>[x4 잭팟]</span>";
-            else if (state.anvil.level >= 10) milestoneText = " <span class='text-purple-400 text-xs font-black'>[x2 잭팟]</span>";
-            else if (state.anvil.level >= 7) milestoneText = " <span class='text-blue-400 text-xs font-black'>[x1.2]</span>";
+            if (state.anvil.level >= 20) milestoneText = " <span class='text-red-500 text-xs font-black animate-pulse'>[절대무기]</span>";
+            else if (state.anvil.level >= 15) milestoneText = " <span class='text-orange-500 text-xs font-black animate-pulse'>[신화급 가치]</span>";
+            else if (state.anvil.level >= 10) milestoneText = " <span class='text-purple-400 text-xs font-black'>[영웅급 가치]</span>";
             document.getElementById('anvil-jackpot').innerHTML = milestoneText;
 
             document.getElementById('anvil-base-price').innerText = sellPrice.toLocaleString();
@@ -1021,7 +1045,6 @@
         });
     }
 
-    // --- 5. 자유 스왑 & 액션 로직 ---
     function craftWeapon(itemId) {
         const item = ITEMS[itemId];
         if(state.gold < item.gold) return;
@@ -1070,7 +1093,6 @@
         if (rand < sRate) {
             state.anvil.level++;
             
-            // 내구도(수명) 잭팟 상승 로직
             let durBonus = 0;
             if (state.anvil.level === 7) durBonus = 2;
             else if (state.anvil.level === 10) durBonus = 3;
@@ -1082,7 +1104,7 @@
                 addLog(`[내구도 상승] ✨ +${state.anvil.level}강 돌파! 최대 내구도(수명)가 ${durBonus} 증가했습니다.`, 'text-cyan-400 font-bold');
             }
 
-            state.anvil.dur = state.anvil.maxDur; // 100% 회복
+            state.anvil.dur = state.anvil.maxDur; 
             addLog(`[성공] 챙!! 무기가 <span class="font-bold">+${state.anvil.level}</span> (으)로 강화됨! (내구도 100% 회복)`, 'text-green-400');
             if(state.anvil.level >= 15) addLog(`[신화] 무기가 신화적인 빛을 뿜어냅니다!!!`, 'text-orange-400 font-black text-lg');
             document.getElementById('use-blessing').checked = false;
@@ -1115,7 +1137,7 @@
 
     function equipToMercFromAnvil() {
         if(!state.anvil) return;
-        if(state.merc.isDispatching) { addLog("[경고] 파견 중에는 무기를 바꿀 수 জ্ঞ니다.", "text-red-400"); return; }
+        if(state.merc.isDispatching) { addLog("[경고] 파견 중에는 무기를 바꿀 수 없습니다.", "text-red-400"); return; }
         
         let temp = state.merc.weapon;
         state.merc.weapon = { ...state.anvil };
